@@ -9,14 +9,18 @@ const fs = require('fs');
 
 const config = require('./config/webserver.json');
 
-// Simple hello world
+const auth = require('./auth0');
+const { requiresAuth } = require('express-openid-connect');
+app.use(auth);
 
 app.get('/', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
     const file = fs.readFileSync('./src/pages/dashboard.html');
     res.statusCode = 200;
+    console.log(req.oidc.isAuthenticated());
     res.end(file.toString());
 });
+
 
 app.use('/assets', Express.static('src/static'));
 
