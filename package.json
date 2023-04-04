@@ -2,10 +2,13 @@
   "name": "bugtracker-nodejs",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "node ./src/index.js && exit 0"
   },
   "author": "",
-  "license": "GPL-3.0"
+  "license": "GPL-3.0",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }

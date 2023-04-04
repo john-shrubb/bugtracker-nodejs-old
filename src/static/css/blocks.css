@@ -1,0 +1,717 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins&family=Roboto&display=swap');
+
+/* CSS Reset. Credit to Meyerweb */
+
+* {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+
+/*
+	Root colours
+*/
+
+:root {
+	--blocks-green: #355E3B;
+	--blocks-green-hover: #2a492f;
+
+	--blocks-red: #ac1010;
+	--blocks-red-hover: #8a1818;
+
+	--blocks-blue: #1b61e2;
+	--blocks-blue-hover: #0b3d9b;
+
+	--blocks-light-blue: #408ed8;
+	--blocks-light-blue-hover: #2966a0;
+
+	--blocks-orange: #ee850d;
+	--blocks-orange-hover: #c56c05;
+
+	--blocks-gray: #cecece;
+	--blocks-gray-hover: #8b8b8b;
+
+	--blocks-dark: #383838;
+	--blocks-dark-hover: #1d1d1d;
+}
+
+/*
+	General blocks
+*/
+
+/*
+	Block static backgrounds
+*/
+
+.background-block {
+	background-repeat: no-repeat !important;
+	background-size: cover !important;
+	background-position: center;
+}
+
+.dark-overlay {
+	background-color: #333333;
+	background-blend-mode: overlay;
+	color: white;
+}
+
+/* Massive block */
+
+.jumbo-block {
+	float: left;
+	width: 100%;
+}
+
+.jumbo-block .content-wrapper {
+	padding: 100px;
+	padding-top: 70px;
+	padding-bottom: 70px;
+}
+
+/* Large block */
+
+.large-block {
+	float: left;
+	width: 100%;
+}
+
+.large-block .content-wrapper {
+	padding: 70px;
+	padding-top: 50px;
+	padding-bottom: 50px;
+}
+
+/* Medium block */
+
+.medium-block {
+	float: left;
+	width: 100%;
+}
+
+.medium-block .content-wrapper {
+	padding: 40px;
+	padding-top: 30px;
+	padding-bottom: 30px;
+}
+
+/* Small block */
+
+.small-block {
+	float: left;
+	width: 100%;
+}
+
+.small-block .content-wrapper {
+	padding: 30px;
+}
+
+@media screen and (max-width: 600px) {
+	.jumbo-block .content-wrapper {
+		padding: 60px;
+	}
+
+	.large-block .content-wrapper {
+		padding: 40px;
+	}
+
+	.medium-block .content-wrapper {
+		padding: 30px;
+	}
+
+	.small-block .content-wrapper {
+		padding: 20px;
+	}
+
+	@media screen and (max-width: 400px) {
+		.jumbo-block .content-wrapper {
+			padding: 50px;
+		}
+
+		.large-block .content-wrapper {
+			padding: 35px;
+		}
+
+		.medium-block .content-wrapper {
+			padding: 22px;
+		}
+
+		.small-block .content-wrapper {
+			padding: 15px;
+		}
+	}
+}
+
+/* Card Block
+To be used in conjunction with other block classes*/
+
+.card-stack a {
+	width: calc(100% - 30px);
+	display: block;
+}
+
+.card-block {
+	margin: 15px;
+	width: calc(100% - 30px);
+	float: left;
+}
+
+.card-block .content-wrapper {
+	padding: 15px;
+	display: flex;
+	flex-direction: column;
+	height: calc(100% - 30px);
+}
+
+.card-block img {
+	max-width: 100%;
+	width: 100%;
+	height: auto;
+	margin-top: auto;
+}
+
+.card-stack {
+	display: flex;
+	width: 100%;
+	flex-direction: row;
+}
+
+@media screen and (max-width: 800px) {
+	.card-stack {
+		flex-direction: column;
+	}
+	
+	.card-stack a {
+		width: 100%;
+	}
+}
+
+/* Footer */
+
+.footer-block {
+	background: var(--blocks-dark-hover);
+	color: white;
+	float: left;
+	width: 100%;
+}
+
+.footer-block .content-wrapper {
+	padding: 10px;
+}
+
+.footer-block p {
+	font-size: 13pt;
+}
+
+/* Stack blocks horizontally */
+
+.block-stack-horizontal {
+	display: flex;
+	flex-direction: row;
+	float: left;
+	max-width: 100%;
+	flex-wrap: nowrap;
+}
+
+.block-stack-horizontal div {
+	min-width: 0;
+}
+
+@media screen and (max-width: 800px) {
+	.block-stack-horizontal {
+		flex-direction: column;
+	}
+}
+
+/* Navigation Bar */
+
+.nav-bar {
+	position: fixed;
+	display: flex;
+	flex-flow: row wrap;
+	width: 100%;
+	float: left;
+	background: var(--blocks-gray);
+	color: black;
+}
+
+.nav-bar h3 {
+	font-family: 'Poppins';
+	font-size: 25pt;
+	padding: 15px;
+	font-weight: bolder;
+}
+
+.nav-bar > a {
+	text-decoration: none;
+	color: inherit;
+	display: flex;
+	flex-direction: row;
+}
+
+.nav-bar .a-wrapper {
+	margin-top: auto;
+	margin-bottom: auto;
+	display: inline-block;
+	margin-left: auto;
+}
+
+.nav-bar .a-wrapper a {
+	font-family: 'Roboto';
+	font-size: 20pt;
+	padding: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-right: 7px;
+	color: inherit;
+	text-decoration: none;
+}
+
+.nav-bar .a-wrapper a:hover {
+	background: var(--blocks-gray-hover);
+}
+
+.nav-bar button {
+	background: transparent;
+	display: none;
+	width: auto;
+	margin-left: auto;
+	margin-top: auto;
+	margin-bottom: auto;
+	margin-right: 5px;
+	height: 50px;
+	padding: 5px;
+}
+
+.nav-bar button img {
+	height: 100%;
+}
+
+.nav-bar a img {
+	height: 75px;
+	margin-top: auto;
+	margin-bottom: auto;
+	float: left;
+}
+
+/*
+	Mobile links
+*/
+
+.mobile-a-wrapper {
+	display: none;
+	width: 100%;
+	flex-direction: column;
+}
+
+.mobile-a-wrapper a {
+	font-family: 'Roboto';
+	font-size: 15pt;
+	width: 100%;
+	background: var(--blocks-gray);
+	color: black;
+	text-decoration: none;
+	padding: 15px;
+}
+
+.mobile-a-wrapper a:hover {
+	background-color: var(--blocks-gray-hover);
+}
+
+/* Navigation bar responsiveness */
+
+@media screen and (max-width: 600px) {
+	.nav-bar h3 {
+		font-size: 20pt;
+	}
+
+	.nav-bar button {
+		display: block;
+	}
+
+	.nav-bar .a-wrapper {
+		display: none;
+	}
+}
+
+/* Navbar Colours */
+
+.nav-bar.red-block a:hover {
+	background: var(--blocks-red-hover); 
+}
+
+.nav-bar.red-block .mobile-a-wrapper a {
+	background: var(--blocks-red);
+	color: white;
+}
+
+.nav-bar.red-block .mobile-a-wrapper a:hover {
+	background: var(--blocks-red-hover);
+}
+
+.nav-bar.red-block button:hover {
+	background: var(--blocks-red-hover);
+}
+
+/* Typography (Yeah I can use clever words) */
+
+h1 {
+	font-family: 'Poppins';
+	font-size: 34pt;
+	font-weight: bolder;
+}
+
+h2 {
+	font-family: 'Roboto';
+	font-size: 28pt;
+}
+
+h3 {
+	font-family: 'Roboto';
+	font-size: 24pt;
+}
+
+h4 {
+	font-family: 'Roboto';
+	font-size: 21pt;
+}
+
+h5 {
+	font-family: 'Roboto';
+	font-size: 19pt;
+}
+
+p {
+	font-family: 'Open Sans';
+	font-size: 18pt;
+}
+
+p a {
+	color: inherit;
+	text-decoration: underline;
+}
+
+p a:hover {
+	text-decoration: none;
+}
+
+a.button {
+	background: var(--blocks-gray);
+	color: black;
+	padding: 15px;
+	font-size: 17pt;
+	font-family: 'Open Sans';
+	display: block;
+	text-decoration: none;
+	width: fit-content;
+}
+
+img {
+	max-width: 100%;
+}
+
+/* Text colours */
+
+.green-text {
+	color: var(--blocks-green);
+}
+
+.blue-text {
+	color: var(--blocks-blue);
+}
+
+.light-blue-text {
+	color: var(--blocks-light-blue);
+}
+
+.red-text {
+	color: var(--blocks-red);
+}
+
+.orange-text {
+	color: var(--blocks-orange);
+}
+
+@media screen and (max-width: 600px) {
+	h1 {
+		font-size: 30pt;
+	}
+
+	h2 {
+		font-size: 25pt;
+	}
+
+	h3 {
+		font-size: 20pt;
+	}
+
+	p {
+		font-size: 15pt;
+	}
+
+	@media screen and (max-width: 400px) {
+		h1 {
+			font-size: 25px;
+		}
+
+		h2 {
+			font-size: 20pt;
+		}
+
+		h3 {
+			font-size: 17pt;
+		}
+
+		p {
+			font-size: 12pt;
+		}
+	}
+}
+
+/*
+	Colours of block
+*/
+
+.green-block {
+	background: var(--blocks-green);
+	color: white;
+}
+
+.blue-block {
+	background-color: var(--blocks-blue);
+	color: white;
+}
+
+.light-blue-block {
+	background-color: var(--blocks-light-blue);
+}
+
+.red-block {
+	background-color: var(--blocks-red);
+	color: white;
+}
+
+.orange-block {
+	background-color: var(--blocks-orange);
+	color: white;
+}
+
+.gray-block {
+	background: lightgray;
+}
+
+/*
+	Slideshow block
+*/
+
+.slideshow-block {
+	width: 100%;
+	background-repeat: no-repeat !important;
+	background-size: cover !important;
+	background-position-y: 30% !important;
+}
+
+.slideshow-block .slideshow-images {
+	display: none; /* Slideshow images purely provide a reference for which images the JS should transition between. */
+}
+
+.slideshow-block.slideshow-dark-overlay {
+	background-blend-mode: overlay;
+	color: white;
+}
+
+/*
+	Inputs and labels and form stuff
+*/
+
+input[type="text"] {
+	display: inline-block;
+
+	font-size: 15pt;
+	font-family: 'Open Sans';
+
+	width: 500px;
+	padding: 5px;
+	margin: 5px;
+
+	border: black 2px solid;
+	border-radius: 0;
+	outline: none;
+}
+
+textarea {
+	display: inline-block;
+
+	font-size: 15pt;
+	font-family: 'Open Sans';
+
+	width: 500px;
+	padding: 5px;
+	margin: 5px;
+
+	border: black 2px solid;
+	border-radius: 0;
+	outline: none;
+}
+
+form textarea:focus, form input[type="text"]:focus {
+	outline: none;
+	border-color: var(--blocks-gray-hover);
+}
+
+label {
+	display: block;
+
+	font-size: 15pt;
+	font-family: 'Open Sans';
+
+	width: 170px;
+	padding: 7px;
+	margin: 5px;
+	float: left;
+}
+
+button {
+	background: var(--blocks-gray);
+	color: black;
+	padding: 15px;
+	font-size: 17pt;
+	font-family: 'Open Sans';
+	display: block;
+}
+
+button:hover {
+	background: var(--blocks-gray-hover) !important;
+}
+
+.blue-button {
+	background: var(--blocks-blue) !important;
+	color: #ffffff !important;
+}
+
+.blue-button:hover {
+	background-color: var(--blocks-blue-hover) !important;
+}
+
+.green-button {
+	background: var(--blocks-green) !important;
+	color: #ffffff !important;
+}
+
+.green-button:hover {
+	background-color: var(--blocks-green-hover) !important;
+}
+
+.red-button {
+	background: var(--blocks-red) !important;
+	color: #ffffff !important;
+}
+
+.red-button:hover {
+	background-color: var(--blocks-red-hover) !important;
+}
+
+.light-blue-button {
+	background: var(--blocks-light-blue) !important;
+	color: #ffffff !important;
+}
+
+.light-blue-button:hover {
+	background-color: var(--blocks-light-blue-hover) !important;
+}
+
+.orange-button {
+	background: var(--blocks-orange) !important;
+	color: #ffffff;
+}
+
+.orange-button:hover {
+	background-color: var(--blocks-orange-hover) !important;
+}
+
+/* Responsiveness */
+
+@media screen and (max-width: 830px) {
+	form {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+	}
+
+	form br {
+		display: none;
+	}
+
+	label {
+		width: 90%;
+		text-align: center;
+	}
+
+	input[type="text"] {
+		width: 90%;
+	}
+
+	textarea {
+		width: 90%;
+	}
+
+	@media screen and (max-width: 600px) {
+		label, textarea, input[type="text"] {
+			font-size: 12pt;
+		}
+
+		form button {
+			font-size: 14pt;
+		}
+	}
+}
+
+/*
+	Videos container for embedded content like YouTube
+*/
+
+.videos-wrapper {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.videos-wrapper iframe {
+	width: 30vw;
+	height: calc(30vw / 1.77);
+	margin: auto;
+	padding-bottom: 15px;
+}
+
+@media screen and (max-width: 1000px) {
+	.videos-wrapper {
+		flex-direction: column;
+	}
+
+	.videos-wrapper iframe {
+		width: 85vw;
+		height: calc(85vw / 1.77);
+		margin: auto;
+	}
+
+	.videos-wrapper iframe:last-child {
+		padding-bottom: 30px;
+	}
+}
+
+/* 
+	Google maps embeds
+	Use https://googlemapsembed.com - Compatability not guaranteed with embeds from other websites.
+*/
+
+.maps-container {
+	margin-top: 15px;
+}
+
+.maps-container * {
+	width: 100% !important;
+	z-index: 2;
+}
