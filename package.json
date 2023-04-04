@@ -9,6 +9,7 @@
   "author": "",
   "license": "GPL-3.0",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "express-openid-connect": "^2.13.0"
   }
 }
