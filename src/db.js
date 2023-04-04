@@ -8,6 +8,7 @@ const database = new pg.Pool({
     'user': process.env.PG_USER,
     'password': process.env.PG_PASSWORD
 });
+
 database.connect();
 
 module.exports = database;
