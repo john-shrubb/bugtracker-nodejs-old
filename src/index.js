@@ -7,11 +7,21 @@ const app = Express();
 
 const fs = require('fs');
 
+// Basic config
+
 const config = require('./config/webserver.json');
+
+// Import database connection
+
+const database = require('./db');
+
+// Connect with auth0 and add it onto the express app
 
 const auth = require('./auth0');
 const { requiresAuth } = require('express-openid-connect');
 app.use(auth);
+
+// Very basic root link. Should redirect to dashboard later in development.
 
 app.get('/', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
