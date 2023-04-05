@@ -21,12 +21,14 @@ const authmid = require('./auth0');
 const { requiresAuth } = require('express-openid-connect'); //eslint-disable-line
 app.use(authmid);
 
-// Create a user cache. Holds details of 30 recent users to avoid repetitive calls to the database.
+// Create a user cache. Holds details of 30 recent users to
+// avoid repetitive calls to the database.
 // Capped at 30 users to avoid memory leak.
 
 const IDGen = require('./utils/idgen');
 
-// Very basic root link. Should redirect to dashboard later in development.
+// Very basic root link.
+// Should redirect to dashboard later in development.
 
 app.use(async (req, res, next) => {
 	if (!req.oidc.isAuthenticated()) {
@@ -50,15 +52,18 @@ app.use(async (req, res, next) => {
 
 		let userID = IDGen(15);
 
-		// Ensure the userID is not already used in the database by constantly checking
+		// Ensure the userID is not already used in the database
+		// by constantly checking
 		let validID = false;
 
 		while (!validID) {
-			// Check DB to ensure that the user ID has not already been assigned.
+			// Check DB to ensure that the user ID has not
+			// already been assigned.
 
 			const checkQuery = await database.query('SELECT * FROM users WHERE user_id=$1', userID);
 
-			// If is has then break the loop, otherwise generate a new ID and repeat.
+			// If is has then break the loop, otherwise
+			// generate a new ID and repeat.
 
 			if (!checkQuery.rows.length) {
 				validID = true;
@@ -71,7 +76,13 @@ app.use(async (req, res, next) => {
 
 		rawQuery = await database.query(
 			'INSERT INTO users (user_id, username, role, auth0id, email) VALUES ($1, $2, $3, $4, $5);',
-			[userID, req.oidc.user.name, 1, req.oidc.user.sub, req.oidc.user.email]
+			[
+				userID,
+				req.oidc.user.name,
+				1,
+				req.oidc.user.sub,
+				req.oidc.user.email
+			]
 		);
 	}
 
@@ -79,7 +90,8 @@ app.use(async (req, res, next) => {
 
 	rawQuery = await database.query('SELECT user_id FROM users WHERE auth0id = $1;', [req.oidc.user.sub]);
 
-	// Add the user ID onto the request object for easy access in the API and other endpoints.
+	// Add the user ID onto the request object for easy access
+	// in the API and other endpoints.
 
 	req.oidc.userID = rawQuery.rows[0]['user_id'];
 	next();
@@ -102,7 +114,8 @@ app.get('/error', (_, __, next) => {
 	next(new Error('abc'))
 })
 
-// Mounts ./static to /assets on web server. Removes uneccessary manual pathing.
+// Mounts ./static to /assets on web server.
+// Removes uneccessary manual pathing.
 
 app.use('/assets', Express.static('src/static'));
 

@@ -1,4 +1,4 @@
 {
-    "prodport": 80,
-    "testport": 8080
+	"prodport": 80,
+	"testport": 8080
 }
