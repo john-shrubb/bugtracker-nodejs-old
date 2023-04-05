@@ -77,7 +77,7 @@ app.use('/assets', Express.static('src/static'));
 
 // EXTREMELY basic error handling.
 
-app.use((error, _, res, __) => {
+app.use((error, _, res, __) => { //eslint-disable-line
 	res.end('500 Error.');
 	console.log(error);
 })
