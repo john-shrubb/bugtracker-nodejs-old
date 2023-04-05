@@ -11,5 +11,14 @@
         "ecmaVersion": "latest"
     },
     "rules": {
+        "max-len": [
+            "error", {
+                "comments": 65,
+                "tabWidth": 4,
+                "ignoreStrings": true
+            }
+        ],
+        "no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
+        "indent": ["error", "tab"]
     }
 }
