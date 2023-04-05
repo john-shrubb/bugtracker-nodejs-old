@@ -5,7 +5,6 @@ const { auth, requiresAuth } = require('express-openid-connect');
 const config = require('./config/auth0.json');
 require('dotenv').config();
 
-console.log(process.env.AUTH0SECRET)
 app.use(auth({
     authRequired: config.authRequired,
     auth0Logout: config.auth0Logout,
