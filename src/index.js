@@ -46,13 +46,40 @@ app.use(async (req, res, next) => {
 	let rawQuery = await database.query('SELECT * FROM users WHERE auth0id = $1;', [req.oidc.user.sub]);
 
 	if (!rawQuery.rowCount) {
+		// Generate a new user ID to be assigned to the new user.
+
+		let userID = IDGen(15);
+
+		// Ensure the userID is not already used in the database by constantly checking
+		let validID = false;
+
+		while (!validID) {
+			// Check DB to ensure that the user ID has not already been assigned.
+
+			const checkQuery = await database.query('SELECT * FROM users WHERE user_id=$1', userID);
+
+			// If is has then break the loop, otherwise generate a new ID and repeat.
+
+			if (!checkQuery.rows.length) {
+				validID = true;
+			} else {
+				userID = IDGen(15);
+			}
+		}
+
+		// Register new user with the database.
+
 		rawQuery = await database.query(
 			'INSERT INTO users (user_id, username, role, auth0id, email) VALUES ($1, $2, $3, $4, $5);',
-			[IDGen(15), req.oidc.user.name, 1, req.oidc.user.sub, req.oidc.user.email]
+			[userID, req.oidc.user.name, 1, req.oidc.user.sub, req.oidc.user.email]
 		);
 	}
 
+	// Grab the user details from the users table
+
 	rawQuery = await database.query('SELECT user_id FROM users WHERE auth0id = $1;', [req.oidc.user.sub]);
+
+	// Add the user ID onto the request object for easy access in the API and other endpoints.
 
 	req.oidc.userID = rawQuery.rows[0]['user_id'];
 	next();
@@ -60,12 +87,16 @@ app.use(async (req, res, next) => {
 
 app.use(require('./api'));
 
+// Very basic root endpoint. Will be expanded upon later.
+
 app.get('/', (req, res) => {
 	res.setHeader('Content-Type', 'text/html');
 	const file = fs.readFileSync('./src/pages/dashboard.html');
 	res.statusCode = 200;
 	res.end(file.toString());
 });
+
+// Test error handler.
 
 app.get('/error', (_, __, next) => {
 	next(new Error('abc'))
