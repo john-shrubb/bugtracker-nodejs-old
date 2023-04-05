@@ -1,7 +1,7 @@
 const Express = require('express');
 const app = Express();
 
-const { auth, requiresAuth } = require('express-openid-connect');
+const { auth } = require('express-openid-connect');
 const config = require('./config/auth0.json');
 require('dotenv').config();
 
