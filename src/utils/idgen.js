@@ -4,5 +4,5 @@ const IDGen = (length) => {
 		id = id.concat(String(Math.ceil(Math.random() * 9)));
 	}
 	return id;
-}
+};
 module.exports = IDGen;

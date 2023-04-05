@@ -12,9 +12,10 @@ const app = Express();
 
 const database = require('./db');
 
-// Pull the ID generation function
+// Pull the ID generation function & verification
 
 const IDGen = require('./utils/idgen');
+const verifyIDFormat = require('./utils/verifyIDFormat');
 
 app.use((req, res, next) => {
 	// Set some basic details like the content type and status
@@ -24,7 +25,7 @@ app.use((req, res, next) => {
 	next();
 });
 
-app.use(Express.json())
+app.use(Express.json());
 
 app.get('/api/v1/user/details', (req, res) => {
 	// Spit out all details about the user.
@@ -55,7 +56,7 @@ app.get('/api/v1/tickets/list', async (req, res) => {
 	if (userDetails.role >= 2) {
 		const allTickets = (await database.query('SELECT * FROM tickets;')).rows;
 
-		for (let x in allTickets) {
+		for (const x in allTickets) {
 			if (allTickets[x]['user_id'] == userID) {
 				allTickets[x]['assigned'] = false;
 			} else {
@@ -73,7 +74,7 @@ app.get('/api/v1/tickets/list', async (req, res) => {
 
 	// Provide information on whether user was assigned the
 	// ticket or not in the output.
-	for (let x in OwnedTickets) {
+	for (const x in OwnedTickets) {
 		OwnedTickets[x]['assigned'] = false;
 	}
 
@@ -85,7 +86,7 @@ app.get('/api/v1/tickets/list', async (req, res) => {
 	// and push it to the owned tickets array to be output to the
 	// endpoint
 
-	for (let x in AssignedTickets) {
+	for (const x in AssignedTickets) {
 		// Grab the ticket ID from each ticket in the array
 		const ticketID = AssignedTickets[x]['ticket_id'];
 
@@ -141,7 +142,7 @@ app.post('/api/v1/tickets/create', async (req, res) => {
 	// Check they have a length.
 
 	if (!ticketTitle.length || !ticketDescription.length) {
-		res.statusCode = 400
+		res.statusCode = 400;
 		res.json({
 			status: 400,
 			response: "Cannot have empty title or description field.",
@@ -199,8 +200,7 @@ app.post('/api/v1/tickets/assign', async (req, res) => {
 
 	// Pull user details
 
-	let userDetails = await database.query('SELECT * FROM users WHERE user_id=$1;', [userID]);
-	userDetails = userDetails.rows[0];
+	const userDetails = (await database.query('SELECT * FROM users WHERE user_id=$1;', [userID])).rows[0];
 
 	// Get ticket id and id of user who is getting
 	// assigned the ticket from request body
@@ -272,6 +272,72 @@ app.post('/api/v1/tickets/assign', async (req, res) => {
 	res.json({
 		status: 200,
 		response: "Succesfully assigned user to ticket.",
+	});
+});
+
+/**
+ * Delete a ticket
+ * POST endpoint
+ * 
+ * Body should look like this
+ * {
+ * 		"ticketID": "839379647315828"
+ * }
+ */
+
+app.post('/api/v1/tickets/delete', async (req, res) => {
+	const ticketID = req.body['ticketID'].trim();
+
+	// Validate the ticket ID is valid
+
+	if (!ticketID || !verifyIDFormat(ticketID)) {
+		res.statusCode = 400;
+		res.json({
+			status: 400,
+			response: "Missing or invalid ticket ID.",
+		});
+		return;
+	}
+
+	// Check the ticket exists
+
+	const ticket = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
+
+	if (!ticket.length) {
+		res.statusCode = 403;
+		res.json({
+			status: 403,
+			response: "Ticket does not exist or you do not have permission to delete it.",
+		});
+		return;
+	}
+
+	// Check permission for user to delete the ticket
+
+	const user = (await database.query('SELECT * FROM users WHERE user_id=$1;', [req.oidc.userID])).rows[0];
+
+	// Users who are a manager or a owner can delete any ticket.
+
+	if (!user.role >= 2) {
+		// Only ticket owners can delete their own ticket.
+
+		if (!ticket['user_id'] !== req.oidc.user_id) {
+			res.statusCode = 403;
+			res.json({
+				status: 403,
+				response: "Ticket does not exist or you do not have permission to delete it.",
+			});
+			return;
+		}
+	}
+
+	// Past this point it is assumed all validation
+	// checks are complete.
+
+	await database.query('DELETE FROM tickets WHERE ticket_id=$1;', [ticketID]);
+	res.json({
+		status: 200,
+		response: "Succesfully deleted ticket.",
 	});
 });
 

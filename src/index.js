@@ -111,8 +111,8 @@ app.get('/', (req, res) => {
 // Test error handler.
 
 app.get('/error', (_, __, next) => {
-	next(new Error('abc'))
-})
+	next(new Error('abc'));
+});
 
 // Mounts ./static to /assets on web server.
 // Removes uneccessary manual pathing.
@@ -124,7 +124,7 @@ app.use('/assets', Express.static('src/static'));
 app.use((error, _, res, __) => { //eslint-disable-line
 	res.end('500 Error.');
 	console.log(error);
-})
+});
 
 // Start the web server up.
 
