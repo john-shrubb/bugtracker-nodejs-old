@@ -27,17 +27,22 @@ app.use((req, res, next) => {
 
 app.use(Express.json());
 
-app.get('/api/v1/user/details', (req, res) => {
-	// Spit out all details about the user.
+app.get('/api/v1/user/details', async (req, res) => {
+	const userDetails = (await database.query('SELECT role FROM users WHERE user_id=$1;', [req.oidc.userID])).rows[0];
+	// Output all necessary details about user
+
 	const response = 
 	{
 		status: 200,
-		response: req.oidc.user,
+		response: {
+			username: req.oidc.user.name,
+			email: req.oidc.user.email,
+			userID: req.oidc.userID,
+			profilepic: req.oidc.user.picture,
+			role: userDetails['role'],
+		},
 	};
 
-	// Append the web server assigned user-id.
-
-	response['response']['user-id'] = req.oidc.userID;
 	// Will be used for profile pictures etc.
 	res.end(JSON.stringify(response));
 });
