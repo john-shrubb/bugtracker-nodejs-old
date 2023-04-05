@@ -50,18 +50,36 @@ app.get('/api/v1/user/details', (req, res) => {
 
 app.get('/api/v1/tickets/list', async (req, res) => {
 	const userID = req.oidc.userID;
+	const userDetails = (await database.query('SELECT * FROM users WHERE user_id=$1', [userID])).rows[0];
+
+	if (userDetails.role >= 2) {
+		const allTickets = (await database.query('SELECT * FROM tickets;')).rows;
+
+		for (let x in allTickets) {
+			if (allTickets[x]['user_id'] == userID) {
+				allTickets[x]['assigned'] = false;
+			} else {
+				allTickets[x]['assigned'] = true;
+			}
+		}
+
+		res.end(JSON.stringify(allTickets));
+		return;
+	}
 
 	// Query for the tickets the user directly owns
 
-	let OwnedTickets = await database.query('SELECT * FROM tickets WHERE user_id=$1;', [userID]);
-	OwnedTickets = OwnedTickets.rows;
+	const OwnedTickets = (await database.query('SELECT * FROM tickets WHERE user_id=$1;', [userID])).rows;
+
+	// Provide information on whether user was assigned the
+	// ticket or not in the output.
+	for (let x in OwnedTickets) {
+		OwnedTickets[x]['assigned'] = false;
+	}
 
 	// Query for tickets that are assigned to the user
 
-	let AssignedTickets = await database.query('SELECT ticket_id FROM userassignments WHERE user_id=$1;', [userID]);
-	AssignedTickets = AssignedTickets.rows;
-
-	AssignedTickets = [{1: 2, 3: 4,}, {5: 6, 7: 8,}];
+	const AssignedTickets = (await database.query('SELECT ticket_id FROM userassignments WHERE user_id=$1;', [userID])).rows;
 
 	// For each assigned ticket, query for all the ticket data
 	// and push it to the owned tickets array to be output to the
@@ -73,14 +91,17 @@ app.get('/api/v1/tickets/list', async (req, res) => {
 
 		// Use ticketID to find full ticket info
 
-		let ticket = await database.query('SELECT * FROM tickets WHERE ticket_id=$1', [ticketID]);
-		ticket = ticket.rows;
+		const ticket = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1', [ticketID])).rows;
 
 		// Push to OwnedTickets.
 
-		OwnedTickets.push(ticket[0]);
+		if (ticket[0]) {
+			// Provide information on whether user was assigned
+			// the ticket or not in the output.
+			ticket[0]['assigned'] = true;
+			OwnedTickets.push(ticket[0]);
+		}
 	}
-	console.log(OwnedTickets);
 
 	res.end(JSON.stringify(OwnedTickets));
 });
@@ -207,7 +228,7 @@ app.post('/api/v1/tickets/assign', async (req, res) => {
 		let userTickets = await database.query('SELECT * FROM tickets WHERE user_id=$1;', [userID]);
 		userTickets = userDetails.rows;
 
-		if (!userTickets.length) {
+		if (!userTickets) {
 			res.statusCode = 403;
 			res.json({
 				status: 403,
