@@ -6,9 +6,150 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Hello world!</title>
 
-	<link rel="stylesheet" href="assets/css/blocks.css" type="text/css" />
-</head>
+	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
+	</head>
 <body>
-	<h1>Hello.</h1>
+	<div class="body-wrapper">
+		<div class="top-title-bar">
+			<h3>Dashboard</h3>
+			<h3 id="top-title-bar-username">Username</h3>
+		</div>
+		<div class="row">
+			<div class="sidebar">
+				<a href="/dashboard">Dashboard</a>
+				<a href="/tickets/create">Create a Ticket</a>
+				<a href="/tickets/viewall">View Tickets</a>
+				<a href="/users/manage">User Management</a>
+				<a href="/logout">Logout</a>
+			</div>
+			<div class="main-wrapper">
+				<div class="statistics">
+					<div id="openTickets" class="stat-board">
+						<h4>Open<br>Tickets</h4>
+						<span class="stat">0</span>
+					</div>
+					<div id="totalTickets" class="stat-board">
+						<h4>Total<br>Tickets</h4>
+						<span class="stat">0</span>
+					</div>
+					<div id="recentTickets" class="stat-board">
+						<h4>Opened<br>Today</h4>
+						<span class="stat">0</span>
+					</div>
+				</div>
+
+				<div class="tickets-table">
+					<h3>View Tickets</h3>
+					<p>Quickly view the most recent opened tickets.</p>
+					<table>
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Description</th>
+								<th>Author</th>
+								<th>View Ticket</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>bla</td>
+								<td>bla</td>
+								<td>bla</td>
+								<td>bla</td>
+							</tr>
+							<tr>
+								<td>bla</td>
+								<td>bla</td>
+								<td>bla</td>
+								<td>bla</td>
+							</tr>
+							<tr>
+								<td>bla</td>
+								<td>bla</td>
+								<td>bla</td>
+								<td>bla</td>
+							</tr>
+							<tr>
+								<td>bla</td>
+								<td>bla</td>
+								<td>bla</td>
+								<td>bla</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Update username header in top right of page
+
+		async function updateUsername() {
+			const request = new XMLHttpRequest();
+			request.open('get', '/api/v1/user/details');
+			request.send();
+			request.onload = function() {
+				const userDetails = JSON.parse(request.responseText)['response'];
+				document.getElementById('top-title-bar-username').innerHTML = userDetails['username'];
+			}
+		}
+
+		updateUsername();
+
+		// Everything to do with tickets
+
+		async function getTickets() {
+			return await new Promise(function (resolve) {
+				const request = new XMLHttpRequest();
+				request.open('get', '/api/v1/tickets/list');
+				request.send();
+				request.onload = function() {
+					resolve(JSON.parse(request.responseText));
+				};
+			});
+		}
+
+		async function updateDashboard() {
+			// Total tickets visible to user
+
+			const ticketList = await getTickets();
+
+			document.getElementById('totalTickets').querySelector('span').innerHTML = ticketList.length;
+
+			// Tickets opened today that are visible to user
+
+			let totalTodayTickets = 0;
+
+			for (const tListIndex in ticketList) {
+				const date = new Date(ticketList[tListIndex]['created_on']).toDateString();
+				const today = new Date().toDateString();
+
+				if (date === today) {
+					totalTodayTickets++;
+				}
+			}
+
+			document.getElementById('recentTickets').querySelector('span').innerHTML = totalTodayTickets;
+
+			// Tickets visible to user that are open
+
+			let openTickets = 0;
+
+			for (const tListIndex in ticketList) {
+				const status = ticketList[tListIndex]['status'];
+
+				if (status !== 3) {
+					openTickets++;
+				}
+			}
+
+			document.getElementById('openTickets').querySelector('span').innerHTML = openTickets;
+
+			return true;
+		}
+
+		updateDashboard();
+	</script>
 </body>
 </html>
