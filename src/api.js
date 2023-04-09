@@ -56,7 +56,27 @@ app.get('/api/v1/user/details', async (req, res) => {
  */
 
 app.post('/api/v1/user/get/id', async (req, res) => {
+	// Get user ID from request body.
+
 	const toGetID = req.body['userID'];
+
+	if (!toGetID) {
+		res.status = 400;
+		res.json({
+			status: 400,
+			response: "Missing \"userID\" from request body.",
+		});
+		return;
+	}
+
+	if (!verifyIDFormat(toGetID)) {
+		res.status = 400;
+		res.json({
+			status: 400,
+			response: "Invalid ID format.",
+		});
+		return;
+	}
 
 	const userDetails = (await database.query('SELECT * FROM users WHERE user_id=$1', [toGetID])).rows[0];
 
@@ -95,7 +115,12 @@ app.post('/api/v1/user/get/id', async (req, res) => {
  */
 
 app.post('/api/v1/users/get/email', async (req, res) => {
+	// Get user email from request body. Convert it to lower case
+	// to aid validation.
+
 	const userEmail = req.body['userEmail'].toLowerCase();
+
+	// Use regex (Not mine btw) for format check on email.
 
 	if (!userEmail.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
 		res.statusCode = 400;
@@ -106,8 +131,11 @@ app.post('/api/v1/users/get/email', async (req, res) => {
 		return;
 	}
 
+	// Get the user details
+
 	const userDetails = (await database.query('SELECT * FROM users WHERE email=$1;', [userEmail])).rows[0];
 
+	// Return the details & exclude some variables for security.
 	const response = 
 	{
 		status: 200,
@@ -119,6 +147,8 @@ app.post('/api/v1/users/get/email', async (req, res) => {
 			role: userDetails['role'],
 		},
 	};
+
+	// Send response back to browser.
 
 	res.json(response);
 });
@@ -186,6 +216,102 @@ app.get('/api/v1/tickets/list', async (req, res) => {
 	}
 
 	res.end(JSON.stringify(OwnedTickets));
+});
+
+/**
+ * Get a specific ticket by it's ID
+ * POST endpoint
+ * 
+ * Body should look like
+ * {
+ * 		"ticketID": "937341038758329"
+ * }
+ */
+
+app.post('/api/v1/tickets/get', async (req, res) => {
+	// Get ticket ID from body of request.
+
+	const ticketID = req.body['ticketID'].trim();
+
+	// Presence check for ticket ID
+
+	if (!ticketID) {
+		res.statusCode = 400;
+		res.json({
+			status: 400,
+			response: "Missing \"ticketID\" key in status body.",
+		});
+		return;
+	}
+
+	// Verify format of ticket ID.
+
+	if (!verifyIDFormat(ticketID)) {
+		res.statusCode = 400;
+		res.json({
+			status: 400,
+			response: "Invalid ticket ID format.",
+		});
+		return;
+	}
+
+	// Grab
+	// - Role of the user, covered in ./doc/users.md
+	// - Details of the ticket, to both determine if the user is
+	//   allowed to access the ticket and to return the details
+	//   to the user.
+	// - Whether the user was assigned to the ticket to determine
+	//   if the user is allowed to see the ticket and to set the
+	//   "assigned" variable.
+
+	const userRole = (await database.query('SELECT role FROM users WHERE user_id=$1', [req.oidc.userID])).rows[0]['role'];
+	const ticketDetails = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
+	const userAssignmentDetails = (await database.query('SELECT * FROM userassignments WHERE ticket_id=$1 AND user_id=$2', [ticketID, req.oidc.userID])).rows[0];
+
+	// Return error if ticket does not exist.
+
+	if (!ticketDetails) {
+		res.statusCode = 400;
+		res.json({
+			status: 400,
+			response: "Ticket could not be found or you are unable to access it.",
+		});
+		return;
+	}
+
+	// Return error if user is not allowed to access the ticket.
+
+	if (userRole === 1 || ticketDetails['user_id'] !== req.oidc.userID) {
+		if (!userAssignmentDetails) {
+			res.statusCode = 400;
+			res.json({
+				status: 400,
+				response: "Ticket could not be found or you are unable to access it.",
+			});
+			return;
+		}
+	}
+
+	// The errors above return the exact same response for
+	// security purposes. It prevents an attacker from being
+	// able to determine if a ticket exists at all to make
+	// it more difficult to poke holes in the bug trackers
+	// security.
+
+	// Set whether the ticket was assigned or not.
+
+	ticketDetails['assigned'] = userAssignmentDetails ? true : false;
+
+	// Create object to be returned to the user.
+
+	const response = {
+		status: 200,
+		response: ticketDetails,
+	};
+
+	// Return the response.
+
+	res.json(response);
 });
 
 /**
