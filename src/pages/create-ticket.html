@@ -38,6 +38,8 @@
 			font-size: 1rem;
 			clear: left;
 			width: calc(100% - 30vw);
+			resize: none;
+			max-width: 500px;
 		}
 
 		form input[type="text"]:focus, form textarea:focus {
@@ -51,6 +53,7 @@
 			background: transparent;
 			outline: 0;
 			font-family: 'Open Sans', Verdana, Geneva, Tahoma, sans-serif;
+			display: block;
 		}
 	</style>
 	</head>
@@ -60,28 +63,26 @@
 			<h3>Create Ticket</h3>
 			<h3 id="top-title-bar-username">Username</h3>
 		</div>
-		<div class="row">
-			<div class="sidebar">
-				<a href="/dashboard">Dashboard</a>
-				<a href="/tickets/create">Create a Ticket</a>
-				<a href="/tickets/viewall">View Tickets</a>
-				<a href="/users/manage">User Management</a>
-				<a href="/logout">Logout</a>
-			</div>
-			<div class="main-wrapper">
-				<div class="create-ticket-form">
-					<h3>Create a ticket</h3>
-					<p>Fill out the title and description fields below and click "Submit" to create a ticket.</p>
-					<form method="post" id="createTicketForm">
-						<label for="ticketTitle">Ticket Title</label>
-						<input type="text" name="ticketTitle" id="ticketTitle">
-						<br>
-						<label for="ticketDescription">Ticket Description</label>
-						<textarea name="ticketDescription" id="ticketDescription" cols="30" rows="10"></textarea>
-						<button>Submit</button>
-						<p style="color: red; display: none;" id="createErrorText"></p>
-					</form>
-				</div>
+		<div class="sidebar">
+			<a href="/dashboard">Dashboard</a>
+			<a href="/tickets/create">Create a Ticket</a>
+			<a href="/tickets/viewall">View Tickets</a>
+			<a href="/users/manage">User Management</a>
+			<a href="/logout">Logout</a>
+		</div>
+		<div class="main-wrapper">
+			<div class="create-ticket-form">
+				<h3>Create a ticket</h3>
+				<p>Fill out the title and description fields below and click "Submit" to create a ticket.</p>
+				<form method="post" id="createTicketForm">
+					<label for="ticketTitle">Ticket Title</label>
+					<input type="text" name="ticketTitle" id="ticketTitle">
+					<br>
+					<label for="ticketDescription">Ticket Description</label>
+					<textarea name="ticketDescription" id="ticketDescription" cols="30" rows="10"></textarea>
+					<button>Submit</button>
+					<p style="color: red; display: none;" id="createErrorText"></p>
+				</form>
 			</div>
 		</div>
 	</div>
