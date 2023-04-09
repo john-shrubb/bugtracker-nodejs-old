@@ -7,11 +7,57 @@
 	<title>Hello world!</title>
 
 	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
+	<style>
+		.main-wrapper .create-ticket-form form {
+			height: 100%;
+		}
+		
+		.main-wrapper > div > * {
+			padding-left: 15px;
+			padding-right: 15px;
+		}
+
+		.main-wrapper > div > *:first-child {
+			padding-top: 15px;
+		}
+
+		form label {
+			display: inline-block;
+			height: 34px;
+			line-height: 34px;
+			width: 200px;
+			float: left;
+			clear: left;
+		}
+
+		form input[type="text"], form textarea {
+			display: inline-block;
+			padding: 5px;
+			border: #3b3b3b 2px solid;
+			font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
+			font-size: 1rem;
+			clear: left;
+			width: calc(100% - 30vw);
+		}
+
+		form input[type="text"]:focus, form textarea:focus {
+			outline: 0;
+			border-color: var(--colours-orange);
+		}
+		form button {
+			padding: 5px;
+			border: var(--colours-orange) 2px solid;
+			color: var(--colours-orange);
+			background: transparent;
+			outline: 0;
+			font-family: 'Open Sans', Verdana, Geneva, Tahoma, sans-serif;
+		}
+	</style>
 	</head>
 <body>
 	<div class="body-wrapper">
 		<div class="top-title-bar">
-			<h3>Dashboard</h3>
+			<h3>Create Ticket</h3>
 			<h3 id="top-title-bar-username">Username</h3>
 		</div>
 		<div class="row">
@@ -24,15 +70,74 @@
 			</div>
 			<div class="main-wrapper">
 				<div class="create-ticket-form">
-                    <h3>Create a ticket</h3>
-                    <p>Fill out the title and description fields below and hit enter to create a ticket.</p>
-					<form method="post">
-                        <input type="text" name="ticketTitle" id="ticketTitle">
-                        <textarea name="ticketDescription" id="ticketDescription" cols="30" rows="10"></textarea>
-                    </form>
+					<h3>Create a ticket</h3>
+					<p>Fill out the title and description fields below and click "Submit" to create a ticket.</p>
+					<form method="post" id="createTicketForm">
+						<label for="ticketTitle">Ticket Title</label>
+						<input type="text" name="ticketTitle" id="ticketTitle">
+						<br>
+						<label for="ticketDescription">Ticket Description</label>
+						<textarea name="ticketDescription" id="ticketDescription" cols="30" rows="10"></textarea>
+						<button>Submit</button>
+						<p style="color: red; display: none;" id="createErrorText"></p>
+					</form>
 				</div>
 			</div>
 		</div>
 	</div>
+
+	<script>
+		const ticketForm = document.getElementById('createTicketForm');
+
+		ticketForm.onsubmit = (ev) => {
+			ev.preventDefault();
+
+			// Get ticket title and description
+
+			const ticketTitle = document.getElementById('ticketTitle').value.trim();
+			const ticketDescription = document.getElementById('ticketDescription').value.trim();
+
+			// Get error text incase it has to be shown or hidden.
+
+			const createErrorText = document.getElementById('createErrorText');
+
+			// Presence check for both values. Show error if the fields were left empty.
+			
+			if (!ticketTitle || !ticketDescription) {
+				createErrorText.innerText = 'Empty ticket title or description fields!';
+				createErrorText.style.display = 'block';
+				return;
+			}
+
+			// Assume that an error has been shown before and set it's display to none.
+
+			createErrorText.style.display = 'none';
+
+			// Make the request to the server.
+
+			const request = new XMLHttpRequest();
+
+			request.open('post', '/api/v1/tickets/create');
+
+			request.setRequestHeader('Content-Type', 'application/json');
+
+			request.send(JSON.stringify({
+				title: ticketTitle,
+				description: ticketDescription,
+			}));
+
+			request.onload = async () => {
+				const responseContent = JSON.parse(request.responseText);
+
+				if (responseContent.status !== 200) {
+					createErrorText.style.display = 'block';
+					createErrorText.innerText = responseContent.response;
+				} else {
+					window.location.replace('/tickets/view?ticket=' + responseContent.response);
+				}
+			};
+		}
+	</script>
+	<script src="/assets/js/updateUsername.js"></script>
 </body>
 </html>

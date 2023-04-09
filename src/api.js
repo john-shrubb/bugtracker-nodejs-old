@@ -214,13 +214,13 @@ app.post('/api/v1/tickets/create', async (req, res) => {
 
 	// Query for insertion into database.
 
-	database.query('INSERT INTO tickets (ticket_id, title, description, user_id) VALUES ($1, $2, $3, $4);', [ticketID, ticketTitle, ticketDescription, userID]);
+	await database.query('INSERT INTO tickets (ticket_id, title, description, user_id) VALUES ($1, $2, $3, $4);', [ticketID, ticketTitle, ticketDescription, userID]);
 
 	// Return a 200 OK with the ticket ID in the body.
 
 	res.json({
 		status: 200,
-		response: IDGen,
+		response: ticketID,
 	});
 });
 
