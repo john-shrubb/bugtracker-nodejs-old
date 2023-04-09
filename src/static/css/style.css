@@ -2,8 +2,8 @@
 
 /* Credit meyerweb.com */
 :root {
-    --colors-orange: #f8a619;
-    --colors-grey: #E9E9E9;
+    --colours-orange: #f8a619;
+    --colours-grey: #E9E9E9;
 }
 * {
 	margin: 0;
@@ -68,7 +68,7 @@ p, span, a {
 */
 
 .top-title-bar {
-    background: var(--colors-orange);
+    background: var(--colours-orange);
     color: white;
     display: flex;
     flex-direction: row;
@@ -89,7 +89,7 @@ p, span, a {
 */
 
 .sidebar {
-    background: var(--colors-grey);
+    background: var(--colours-grey);
     display: flex;
     flex-direction: column;
     width: max-content;
@@ -121,7 +121,7 @@ p, span, a {
 }
 
 .main-wrapper .statistics .stat-board {
-    background: var(--colors-orange);
+    background: var(--colours-orange);
     color: white;
     padding: 20px;
     margin: 20px;
