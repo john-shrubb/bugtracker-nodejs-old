@@ -49,14 +49,13 @@ app.get('/api/v1/user/details', async (req, res) => {
 });
 
 /**
- * Get a user
+ * Get a user by their ID
  * Request body should look like {
- * 		"getby": "email",
- * 		"identifier": "john.pork@gmail.com"
+ * 		"userID": "692735930173892"
  * }
  */
 
-app.post('/api/v1/user/get', async (req, res) => {
+app.post('/api/v1/user/get/id', async (req, res) => {
 	const toGetID = req.body['userID'];
 
 	const userDetails = (await database.query('SELECT * FROM users WHERE user_id=$1', [toGetID])).rows[0];
@@ -83,6 +82,45 @@ app.post('/api/v1/user/get', async (req, res) => {
 	};
 
 	req.json(response);
+});
+
+/**
+ * Get a user by their email
+ * POST endpoint
+ * 
+ * Request body should look like
+ * {
+ * 		"userEmail": "john.pork@gmail.com"
+ * }
+ */
+
+app.post('/api/v1/users/get/email', async (req, res) => {
+	const userEmail = req.body['userEmail'].toLowerCase();
+
+	if (!userEmail.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
+		res.statusCode = 400;
+		res.json({
+			status: 400,
+			response: "Invalid email address",
+		});
+		return;
+	}
+
+	const userDetails = (await database.query('SELECT * FROM users WHERE email=$1;', [userEmail])).rows[0];
+
+	const response = 
+	{
+		status: 200,
+		response: {
+			username: userDetails['username'],
+			email: userDetails['email'],
+			userID: userDetails['user_id'],
+			profilepic: userDetails['picture'],
+			role: userDetails['role'],
+		},
+	};
+
+	res.json(response);
 });
 
 /**
