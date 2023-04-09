@@ -75,35 +75,60 @@ app.use(async (req, res, next) => {
 		// Register new user with the database.
 
 		rawQuery = await database.query(
-			'INSERT INTO users (user_id, username, role, auth0id, email) VALUES ($1, $2, $3, $4, $5);',
+			'INSERT INTO users (user_id, username, role, auth0id, email, picture) VALUES ($1, $2, $3, $4, $5, $6);',
 			[
 				userID,
 				req.oidc.user.name,
 				1,
 				req.oidc.user.sub,
-				req.oidc.user.email
+				req.oidc.user.email,
+				req.oidc.user.picture
 			]
 		);
 	}
 
 	// Grab the user details from the users table
 
-	rawQuery = await database.query('SELECT user_id FROM users WHERE auth0id = $1;', [req.oidc.user.sub]);
+	rawQuery = (await database.query('SELECT user_id FROM users WHERE auth0id = $1;', [req.oidc.user.sub])).rows[0];
 
 	// Add the user ID onto the request object for easy access
 	// in the API and other endpoints.
 
-	req.oidc.userID = rawQuery.rows[0]['user_id'];
+	req.oidc.userID = rawQuery['user_id'];
+
+	if (rawQuery['picture'] !== req.oidc.user.picture) {
+		await database.query('UPDATE users SET picture=$1 WHERE auth0id=$2;', [req.oidc.user.picture, req.oidc.user.sub]);
+	}
 	next();
 });
 
+// Mounts ./static to /assets on web server.
+// Removes uneccessary manual pathing.
+
+app.use('/assets/', Express.static('src/static'));
+
 app.use(require('./api'));
 
-// Very basic root endpoint. Will be expanded upon later.
+// Root redirects to dashboard
 
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
+	res.redirect('/dashboard');
+});
+
+// Dashboard page
+
+app.get('/dashboard', (req, res) => {
 	res.setHeader('Content-Type', 'text/html');
 	const file = fs.readFileSync('./src/pages/dashboard.html');
+	res.statusCode = 200;
+	res.end(file.toString());
+});
+
+// Ticket Creation Page
+
+app.get('/tickets/create', (req, res) => {
+	res.setHeader('Content-Type', 'text/html');
+	const file = fs.readFileSync('./src/pages/create-ticket.html');
 	res.statusCode = 200;
 	res.end(file.toString());
 });
@@ -113,11 +138,6 @@ app.get('/', (req, res) => {
 app.get('/error', (_, __, next) => {
 	next(new Error('abc'));
 });
-
-// Mounts ./static to /assets on web server.
-// Removes uneccessary manual pathing.
-
-app.use('/assets', Express.static('src/static'));
 
 // EXTREMELY basic error handling.
 

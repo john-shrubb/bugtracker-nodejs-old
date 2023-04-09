@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Hello world!</title>
+
+	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
+	</head>
+<body>
+	<div class="body-wrapper">
+		<div class="top-title-bar">
+			<h3>Dashboard</h3>
+			<h3 id="top-title-bar-username">Username</h3>
+		</div>
+		<div class="row">
+			<div class="sidebar">
+				<a href="/dashboard">Dashboard</a>
+				<a href="/tickets/create">Create a Ticket</a>
+				<a href="/tickets/viewall">View Tickets</a>
+				<a href="/users/manage">User Management</a>
+				<a href="/logout">Logout</a>
+			</div>
+			<div class="main-wrapper">
+				<div class="create-ticket-form">
+                    <h3>Create a ticket</h3>
+                    <p>Fill out the title and description fields below and hit enter to create a ticket.</p>
+					<form method="post">
+                        <input type="text" name="ticketTitle" id="ticketTitle">
+                        <textarea name="ticketDescription" id="ticketDescription" cols="30" rows="10"></textarea>
+                    </form>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
