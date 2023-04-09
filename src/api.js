@@ -30,6 +30,7 @@ app.use(Express.json());
 app.get('/api/v1/user/details', async (req, res) => {
 	const userDetails = (await database.query('SELECT role FROM users WHERE user_id=$1;', [req.oidc.userID])).rows[0];
 	// Output all necessary details about user
+	// Details mostly just pulled from users req.oidc
 
 	const response = 
 	{
@@ -45,6 +46,43 @@ app.get('/api/v1/user/details', async (req, res) => {
 
 	// Will be used for profile pictures etc.
 	res.end(JSON.stringify(response));
+});
+
+/**
+ * Get a user
+ * Request body should look like {
+ * 		"getby": "email",
+ * 		"identifier": "john.pork@gmail.com"
+ * }
+ */
+
+app.post('/api/v1/user/get', async (req, res) => {
+	const toGetID = req.body['userID'];
+
+	const userDetails = (await database.query('SELECT * FROM users WHERE user_id=$1', [toGetID])).rows[0];
+
+	if (!userDetails) {
+		res.statusCode = 404;
+		res.json({
+			status: 404,
+			response: "User not found.",
+		});
+		return;
+	}
+
+	const response = 
+	{
+		status: 200,
+		response: {
+			username: userDetails['username'],
+			email: userDetails['email'],
+			userID: userDetails['user_id'],
+			profilepic: userDetails['picture'],
+			role: userDetails['role'],
+		},
+	};
+
+	req.json(response);
 });
 
 /**
@@ -185,6 +223,7 @@ app.post('/api/v1/tickets/create', async (req, res) => {
 		response: IDGen,
 	});
 });
+
 
 /**
  * Assign a ticket.
