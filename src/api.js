@@ -55,7 +55,7 @@ app.get('/api/v1/user/details', async (req, res) => {
  * }
  */
 
-app.post('/api/v1/user/get/id', async (req, res) => {
+app.post('/api/v1/users/get/id', async (req, res) => {
 	// Get user ID from request body.
 
 	const toGetID = req.body['userID'];
@@ -101,7 +101,7 @@ app.post('/api/v1/user/get/id', async (req, res) => {
 		},
 	};
 
-	req.json(response);
+	res.json(response);
 });
 
 /**
