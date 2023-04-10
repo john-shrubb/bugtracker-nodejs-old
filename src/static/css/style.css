@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400&family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato&family=Roboto:wght@400;500&display=swap');
 
 /* Credit meyerweb.com */
 :root {
     --colours-orange: #f8a619;
-    --colours-grey: #E9E9E9;
+    --colours-grey: #f1f1f1;
 }
 * {
 	margin: 0;
@@ -17,6 +17,7 @@ html {
     font-size: 13pt;
     font-family: 'Roboto', Arial, Helvetica, sans-serif;
     height: 100%;
+    font-weight: lighter;
 }
 
 body {
@@ -33,6 +34,7 @@ h2 {
 
 h3 {
     font-size: 2.25rem;
+    font-weight: 500;
 }
 
 h4 {
@@ -48,8 +50,7 @@ h6 {
 }
 
 p, span, a {
-    font-family: 'Open Sans', Verdana, Geneva, Tahoma, sans-serif;
-    font-weight: bolder;
+    font-family: 'Lato', Verdana, Geneva, Tahoma, sans-serif;
 }
 
 /*
@@ -69,6 +70,7 @@ p, span, a {
 .top-title-bar h3 {
     padding: 20px;
     font-size: 2rem;
+    font-weight: lighter;
 }
 
 .top-title-bar h3:last-child {
@@ -97,7 +99,6 @@ p, span, a {
     font-size: 1.5rem;
     color: black;
     padding: 10px;
-    font-weight: bolder;
     width: 250px;
 }
 
@@ -108,28 +109,4 @@ p, span, a {
 .main-wrapper {
     display: flex;
     flex-direction: column;
-}
-
-.main-wrapper .statistics {
-    display: flex;
-    flex-direction: row;
-}
-
-.main-wrapper .statistics .stat-board {
-    background: var(--colours-orange);
-    color: white;
-    padding: 20px;
-    margin: 20px;
-    text-align: center;
-    border-radius: 25px;
-    flex-basis: 0;
-    flex-grow: 1;
-}
-
-.main-wrapper .statistics .stat-board span {
-    font-size: 2rem;
-}
-
-.main-wrapper div > * {
-    padding-bottom: 5px;
 }

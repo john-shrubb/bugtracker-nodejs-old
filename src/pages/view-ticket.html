@@ -104,7 +104,7 @@
         // Make a request to fetch the details of the ticket.
 
         const ticketRequest = new XMLHttpRequest();
-        ticketRequest.open('post', '/api/v1/tickets/get');
+        ticketRequest.open('post', '/api/tickets/get');
         ticketRequest.setRequestHeader('Content-Type', 'application/json');
         ticketRequest.send(JSON.stringify({
             ticketID: ticketID,
@@ -142,7 +142,7 @@
             // Open a request to get the details of the author of the ticket.
 
             const authorRequest = new XMLHttpRequest();
-            authorRequest.open('post', '/api/v1/users/get/id');
+            authorRequest.open('post', '/api/users/get/id');
             authorRequest.setRequestHeader('Content-Type', 'application/json');
             authorRequest.send(JSON.stringify({
                 'userID': ticketDetails['user_id'],
@@ -158,7 +158,7 @@
 
         const deleteTicket = () => {
             const request = new XMLHttpRequest();
-            request.open('post', '/api/v1/tickets/delete');
+            request.open('post', '/api/tickets/delete');
             request.setRequestHeader('Content-Type', 'application/json');
             request.send(JSON.stringify({
                 ticketID: ticketID,

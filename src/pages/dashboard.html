@@ -7,7 +7,32 @@
 	<title>Hello world!</title>
 
 	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
-	</head>
+	<style>
+		.main-wrapper .statistics {
+			display: flex;
+			flex-direction: row;
+		}
+
+		.main-wrapper .statistics .stat-board {
+			background: var(--colours-orange);
+			color: white;
+			padding: 20px;
+			margin: 20px;
+			text-align: center;
+			border-radius: 25px;
+			flex-basis: 0;
+			flex-grow: 1;
+		}
+
+		.main-wrapper .statistics .stat-board span {
+			font-size: 2rem;
+		}
+
+		.main-wrapper div > * {
+			padding-bottom: 5px;
+		}
+	</style>
+</head>
 <body>
 	<div class="top-title-bar">
 		<h3>Dashboard</h3>
@@ -45,7 +70,7 @@
 		async function getTickets() {
 			return await new Promise(function (resolve) {
 				const request = new XMLHttpRequest();
-				request.open('get', '/api/v1/tickets/list');
+				request.open('get', '/api/tickets/list');
 				request.send();
 				request.onload = function() {
 					resolve(JSON.parse(request.responseText));
