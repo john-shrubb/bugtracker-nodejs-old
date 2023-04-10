@@ -16,8 +16,10 @@ app.use(Express.json());
 
 const ticketsAPI = require('./api/tickets');
 const userAPI = require('./api/user');
+const commentsAPI = require('./api/comments');
 
 app.use(ticketsAPI);
 app.use(userAPI);
+app.use(commentsAPI);
 
 module.exports = app;

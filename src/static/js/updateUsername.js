@@ -3,7 +3,7 @@
 
 async function updateUsername() {
 	const request = new XMLHttpRequest();
-	request.open('get', '/api/v1/user/details');
+	request.open('get', '/api/user/details');
 	request.send();
 	request.onload = function() {
 		const userDetails = JSON.parse(request.responseText)['response'];

@@ -24,7 +24,7 @@ const IDGen = require('../utils/idgen');
  * No body needed.
  */
 
-app.get('/api/v1/tickets/list', async (req, res) => {
+app.get('/api/tickets/list', async (req, res) => {
 	const userID = req.oidc.userID;
 	const userDetails = (await database.query('SELECT * FROM users WHERE user_id=$1', [userID])).rows[0];
 
@@ -92,7 +92,7 @@ app.get('/api/v1/tickets/list', async (req, res) => {
  * }
  */
 
-app.post('/api/v1/tickets/get', async (req, res) => {
+app.post('/api/tickets/get', async (req, res) => {
 	// Get ticket ID from body of request.
 
 	const ticketID = req.body['ticketID'].trim();
@@ -103,7 +103,7 @@ app.post('/api/v1/tickets/get', async (req, res) => {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
-			response: "Missing \"ticketID\" key in status body.",
+			response: 'Missing "ticketID" key in status body.',
 		});
 		return;
 	}
@@ -114,7 +114,7 @@ app.post('/api/v1/tickets/get', async (req, res) => {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
-			response: "Invalid ticket ID format.",
+			response: 'Invalid ticket ID format.',
 		});
 		return;
 	}
@@ -138,7 +138,7 @@ app.post('/api/v1/tickets/get', async (req, res) => {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
-			response: "Ticket could not be found or you are unable to access it.",
+			response: 'Ticket could not be found or you are unable to access it.',
 		});
 		return;
 	}
@@ -150,7 +150,7 @@ app.post('/api/v1/tickets/get', async (req, res) => {
 			res.statusCode = 400;
 			res.json({
 				status: 400,
-				response: "Ticket could not be found or you are unable to access it.",
+				response: 'Ticket could not be found or you are unable to access it.',
 			});
 			return;
 		}
@@ -189,7 +189,7 @@ app.post('/api/v1/tickets/get', async (req, res) => {
  * }
  */
 
-app.post('/api/v1/tickets/create', async (req, res) => {
+app.post('/api/tickets/create', async (req, res) => {
 	const userID = req.oidc.userID;
 
 	// Check that all required fields are present.
@@ -200,7 +200,7 @@ app.post('/api/v1/tickets/create', async (req, res) => {
 		req.statusCode = 400;
 		res.json({
 			status: 400,
-			response: "Missing title or description of ticket in body.",
+			response: 'Missing title or description of ticket in body.',
 		});
 		return;
 	}
@@ -216,7 +216,7 @@ app.post('/api/v1/tickets/create', async (req, res) => {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
-			response: "Cannot have empty title or description field.",
+			response: 'Cannot have empty title or description field.',
 		});
 		return;
 	}
@@ -265,7 +265,7 @@ app.post('/api/v1/tickets/create', async (req, res) => {
  * }
  */
 
-app.post('/api/v1/tickets/assign', async (req, res) => {
+app.post('/api/tickets/assign', async (req, res) => {
 	// Pull User ID from request object
 
 	const userID = req.oidc.userID;
@@ -304,7 +304,7 @@ app.post('/api/v1/tickets/assign', async (req, res) => {
 			res.statusCode = 403;
 			res.json({
 				status: 403,
-				response: "Either you do not have permission to assign this ticket or it does not exist.",
+				response: 'Either you do not have permission to assign this ticket or it does not exist.',
 			});
 			return;
 		}
@@ -321,7 +321,7 @@ app.post('/api/v1/tickets/assign', async (req, res) => {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
-			response: "Either you do not have permission to assign this ticket or it does not exist.",
+			response: 'Either you do not have permission to assign this ticket or it does not exist.',
 		});
 		return;
 	}
@@ -332,7 +332,7 @@ app.post('/api/v1/tickets/assign', async (req, res) => {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
-			response: "The user you are attempting to assign does not exist."
+			response: 'The user you are attempting to assign does not exist.'
 		});
 		return;
 	}
@@ -343,7 +343,7 @@ app.post('/api/v1/tickets/assign', async (req, res) => {
 	database.query('INSERT INTO userassignments (user_id, ticket_id, assigned_by) VALUES ($1, $2, $3);', [toBeAssignedID, ticketID, userID]);
 	res.json({
 		status: 200,
-		response: "Succesfully assigned user to ticket.",
+		response: 'Succesfully assigned user to ticket.',
 	});
 });
 
@@ -357,7 +357,7 @@ app.post('/api/v1/tickets/assign', async (req, res) => {
  * }
  */
 
-app.post('/api/v1/tickets/delete', async (req, res) => {
+app.post('/api/tickets/delete', async (req, res) => {
 	const ticketID = req.body['ticketID'].trim();
 
 	// Validate the ticket ID is valid
@@ -366,7 +366,7 @@ app.post('/api/v1/tickets/delete', async (req, res) => {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
-			response: "Missing or invalid ticket ID.",
+			response: 'Missing or invalid ticket ID.',
 		});
 		return;
 	}
@@ -382,7 +382,7 @@ app.post('/api/v1/tickets/delete', async (req, res) => {
 		res.statusCode = 403;
 		res.json({
 			status: 403,
-			response: "Ticket does not exist or you do not have permission to delete it.",
+			response: 'Ticket does not exist or you do not have permission to delete it.',
 		});
 		return;
 	}
@@ -401,7 +401,7 @@ app.post('/api/v1/tickets/delete', async (req, res) => {
 			res.statusCode = 403;
 			res.json({
 				status: 403,
-				response: "Ticket does not exist or you do not have permission to delete it.",
+				response: 'Ticket does not exist or you do not have permission to delete it.',
 			});
 			return;
 		}
@@ -413,7 +413,7 @@ app.post('/api/v1/tickets/delete', async (req, res) => {
 	await database.query('DELETE FROM tickets WHERE ticket_id=$1;', [ticketID]);
 	res.json({
 		status: 200,
-		response: "Succesfully deleted ticket.",
+		response: 'Succesfully deleted ticket.',
 	});
 });
 

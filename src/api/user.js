@@ -11,7 +11,7 @@ const database = require('../db');
 
 const verifyIDFormat = require('../utils/verifyIDFormat');
 
-app.get('/api/v1/user/details', async (req, res) => {
+app.get('/api/user/details', async (req, res) => {
 	const userDetails = (await database.query('SELECT role FROM users WHERE user_id=$1;', [req.oidc.userID])).rows[0];
 	// Output all necessary details about user
 	// Details mostly just pulled from users req.oidc
@@ -39,7 +39,7 @@ app.get('/api/v1/user/details', async (req, res) => {
  * }
  */
 
-app.post('/api/v1/users/get/id', async (req, res) => {
+app.post('/api/users/get/id', async (req, res) => {
 	// Get user ID from request body.
 
 	const toGetID = req.body['userID'];
@@ -48,7 +48,7 @@ app.post('/api/v1/users/get/id', async (req, res) => {
 		res.status = 400;
 		res.json({
 			status: 400,
-			response: "Missing \"userID\" from request body.",
+			response: 'Missing "userID" from request body.',
 		});
 		return;
 	}
@@ -57,7 +57,7 @@ app.post('/api/v1/users/get/id', async (req, res) => {
 		res.status = 400;
 		res.json({
 			status: 400,
-			response: "Invalid ID format.",
+			response: 'Invalid ID format.',
 		});
 		return;
 	}
@@ -68,7 +68,7 @@ app.post('/api/v1/users/get/id', async (req, res) => {
 		res.statusCode = 404;
 		res.json({
 			status: 404,
-			response: "User not found.",
+			response: 'User not found.',
 		});
 		return;
 	}
@@ -98,7 +98,7 @@ app.post('/api/v1/users/get/id', async (req, res) => {
  * }
  */
 
-app.post('/api/v1/users/get/email', async (req, res) => {
+app.post('/api/users/get/email', async (req, res) => {
 	// Get user email from request body. Convert it to lower case
 	// to aid validation.
 
@@ -110,7 +110,7 @@ app.post('/api/v1/users/get/email', async (req, res) => {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
-			response: "Invalid email address",
+			response: 'Invalid email address',
 		});
 		return;
 	}
