@@ -15,7 +15,8 @@
             "error", {
                 "comments": 65,
                 "tabWidth": 4,
-                "ignoreStrings": true
+                "ignoreStrings": true,
+                "ignoreRegExpLiterals": true
             }
         ],
         "no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
