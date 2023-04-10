@@ -149,7 +149,7 @@
             }));
 
             authorRequest.onload = () => {
-                authorDetails = JSON.parse(authorRequest.responseText);
+                authorDetails = JSON.parse(authorRequest.responseText)['response'];
 
                 authorUsernameSpan.innerText = authorDetails['username'] ? authorDetails['username'] : 'Deleted User'; // Set username
                 authorProfilePicture.src = authorDetails['profilepic']; // Set PFP

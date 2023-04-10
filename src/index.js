@@ -106,8 +106,8 @@ app.use(async (req, res, next) => {
 // Removes uneccessary manual pathing.
 
 app.use('/assets/', Express.static('src/static'));
-
-app.use(require('./api'));
+const api = require('./api');
+app.use(api);
 
 // Root redirects to dashboard
 
