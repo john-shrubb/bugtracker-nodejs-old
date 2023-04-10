@@ -36,6 +36,17 @@
         p {
             font-size: 1.5rem;
         }
+
+        button {
+            width: max-content;
+            display: block;
+            font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
+            font-size: 1.25rem;
+            padding: 5px;
+            color: #000000;
+            background: transparent;
+            border: 3px solid var(--colours-orange);
+        }
     </style>
 	</head>
 <body>
@@ -59,25 +70,38 @@
                 <span id="timestamp">Loading time...</span>
             </span>
             <p id="ticket-description">Loading ticket description...</p>
+
+            <button onclick="deleteTicket()">Delete Ticket</button>
 		</div>
 	</div>
 
 	<script src="/assets/js/updateUsername.js"></script>
     <script>
+        // Grab multiple very important variables. Is supposed to access the DOM as much as
+        // is required at the beginning for optimisation purposes.
+
         const query = new URLSearchParams(window.location.search);
         const ticketTitleElement = document.getElementById('ticket-title');
         const ticketTitleDescription = document.getElementById('ticket-description');
         const authorProfilePicture = document.getElementById('authorPFP');
         const authorUsernameSpan = document.getElementById('author-username')
 
+        // Will be defined later on, look in the mess that is two functions inside of eachother.
+
         let ticketDetails;
         let authorDetails;
+
+        // Just redirects to dashboard if there isn't a ticket ID.
 
         if (!query.has('ticket')) {
             window.location.replace('/dashboard');
         }
 
+        // Get ?ticket=123 stuff from URL
+
         const ticketID = query.get('ticket');
+
+        // Make a request to fetch the details of the ticket.
 
         const ticketRequest = new XMLHttpRequest();
         ticketRequest.open('post', '/api/v1/tickets/get');
@@ -85,11 +109,37 @@
         ticketRequest.send(JSON.stringify({
             ticketID: ticketID,
         }));
+        
+        // Set the title & description of the ticket
 
         ticketRequest.onload = () => {
-            ticketDetails = JSON.parse(ticketRequest.responseText)['response'];
+            // Parse JSON response
+            ticketDetails = JSON.parse(ticketRequest.responseText);
+
+            if (ticketDetails['status'] !== 200) {
+                alert('Ticket does not exist or you have insufficient permissions to access it!');
+                return window.location.replace('/dashboard');
+            }
+            ticketDetails = ticketDetails['response'];
+
+            // Set title and description of ticket
+
             ticketTitleElement.innerText = ticketDetails['title'];
             ticketTitleDescription.innerText = ticketDetails['description'];
+
+            // Set date & time of ticket. Displays as "today" instead of a full date if it was created today.
+
+            const createdDate = new Date(ticketDetails['created_on']); // Date of ticket creation
+            const ticketDateSpan = document.getElementById('timestamp'); // The #timestamp HTML element
+            if (createdDate.toDateString() === new Date().toDateString()) { // Was the ticket created today?
+                ticketDateSpan.innerText = `Today at ${createdDate.getHours()}:${createdDate.getMinutes()}`;
+                //                          "Today at 10:54"
+            } else {
+                ticketDateSpan.innerText = `${createdDate.toDateString()} at ${createdDate.getHours()}:${createdDate.getMinutes()}`
+                //                         "Thu Apr 06 2023 at 10:56"
+            }
+
+            // Open a request to get the details of the author of the ticket.
 
             const authorRequest = new XMLHttpRequest();
             authorRequest.open('post', '/api/v1/users/get/id');
@@ -99,18 +149,28 @@
             }));
 
             authorRequest.onload = () => {
-                console.log(authorRequest.responseText);
-                authorDetails = JSON.parse(authorRequest.responseText)['response'];
+                authorDetails = JSON.parse(authorRequest.responseText);
 
-                authorUsernameSpan.innerText = authorDetails['username'];
-                authorProfilePicture.src = authorDetails['profilepic']
+                authorUsernameSpan.innerText = authorDetails['username'] ? authorDetails['username'] : 'Deleted User'; // Set username
+                authorProfilePicture.src = authorDetails['profilepic']; // Set PFP
+            };
+        };
 
-                const createdDate = new Date(ticketDetails['created_on']);
-                const ticketDateSpan = document.getElementById('timestamp');
-                if (createdDate.toDateString() === new Date().toDateString()) {
-                    ticketDateSpan.innerText = `Today at ${createdDate.getHours()}:${createdDate.getMinutes()}`;
+        const deleteTicket = () => {
+            const request = new XMLHttpRequest();
+            request.open('post', '/api/v1/tickets/delete');
+            request.setRequestHeader('Content-Type', 'application/json');
+            request.send(JSON.stringify({
+                ticketID: ticketID,
+            }));
+
+            request.onload = () => {
+                const results = JSON.parse(request.responseText);
+
+                if (results['status'] !== 200) {
+                    alert(results['response']);
                 } else {
-                    ticketDateSpan.innerText = `${createdDate.toDateString()} at ${createdDate.getHours()}:${createdDate.getMinutes()}`
+                    window.location.replace('/dashboard');
                 }
             };
         };

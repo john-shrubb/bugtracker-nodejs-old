@@ -511,7 +511,10 @@ app.post('/api/v1/tickets/delete', async (req, res) => {
 
 	const ticket = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
 
-	if (!ticket.length) {
+	if (!ticket) {
+		console.log('missing ticket');
+		console.log(ticketID);
+		console.log(ticket);
 		res.statusCode = 403;
 		res.json({
 			status: 403,
@@ -528,6 +531,7 @@ app.post('/api/v1/tickets/delete', async (req, res) => {
 
 	if (!user.role >= 2) {
 		// Only ticket owners can delete their own ticket.
+		console.log('actually insufficient perms');
 
 		if (!ticket['user_id'] !== req.oidc.user_id) {
 			res.statusCode = 403;
