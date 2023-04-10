@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Hello world!</title>
+
+	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
+	<style>
+        div.main-wrapper {
+            padding: 15px;
+        }
+
+        #authorPFP {
+            height: 30px;
+            border-radius: 15px;
+            display: block;
+            float: left;
+        }
+
+        #author-username {
+            font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
+            float: left;
+            font-size: 1.25rem;
+            height: 30px;
+            line-height: 30px;
+            padding-left: 5px;
+        }
+
+        #timestamp {
+            color: #c2c2c2;
+            line-height: 30px;
+            padding-left: 20px;
+        }
+        p {
+            font-size: 1.5rem;
+        }
+    </style>
+	</head>
+<body>
+	<div class="body-wrapper">
+		<div class="top-title-bar">
+			<h3>View Ticket</h3>
+			<h3 id="top-title-bar-username">Username</h3>
+		</div>
+		<div class="sidebar">
+			<a href="/dashboard">Dashboard</a>
+			<a href="/tickets/create">Create a Ticket</a>
+			<a href="/tickets/viewall">View Tickets</a>
+			<a href="/users/manage">User Management</a>
+			<a href="/logout">Logout</a>
+		</div>
+		<div class="main-wrapper">
+            <h3 id="ticket-title">Loading title...</h3>
+            <span class="author-span">
+                <img id="authorPFP" src="" referrerpolicy="no-referrer" alt="Author Profile Picture">
+                <span id="author-username">Loading author</span>
+                <span id="timestamp">Loading time...</span>
+            </span>
+            <p id="ticket-description">Loading ticket description...</p>
+		</div>
+	</div>
+
+	<script src="/assets/js/updateUsername.js"></script>
+    <script>
+        const query = new URLSearchParams(window.location.search);
+        const ticketTitleElement = document.getElementById('ticket-title');
+        const ticketTitleDescription = document.getElementById('ticket-description');
+        const authorProfilePicture = document.getElementById('authorPFP');
+        const authorUsernameSpan = document.getElementById('author-username')
+
+        let ticketDetails;
+        let authorDetails;
+
+        if (!query.has('ticket')) {
+            window.location.replace('/dashboard');
+        }
+
+        const ticketID = query.get('ticket');
+
+        const ticketRequest = new XMLHttpRequest();
+        ticketRequest.open('post', '/api/v1/tickets/get');
+        ticketRequest.setRequestHeader('Content-Type', 'application/json');
+        ticketRequest.send(JSON.stringify({
+            ticketID: ticketID,
+        }));
+
+        ticketRequest.onload = () => {
+            ticketDetails = JSON.parse(ticketRequest.responseText)['response'];
+            ticketTitleElement.innerText = ticketDetails['title'];
+            ticketTitleDescription.innerText = ticketDetails['description'];
+
+            const authorRequest = new XMLHttpRequest();
+            authorRequest.open('post', '/api/v1/users/get/id');
+            authorRequest.setRequestHeader('Content-Type', 'application/json');
+            authorRequest.send(JSON.stringify({
+                'userID': ticketDetails['user_id'],
+            }));
+
+            authorRequest.onload = () => {
+                console.log(authorRequest.responseText);
+                authorDetails = JSON.parse(authorRequest.responseText)['response'];
+
+                authorUsernameSpan.innerText = authorDetails['username'];
+                authorProfilePicture.src = authorDetails['profilepic']
+
+                const createdDate = new Date(ticketDetails['created_on']);
+                const ticketDateSpan = document.getElementById('timestamp');
+                if (createdDate.toDateString() === new Date().toDateString()) {
+                    ticketDateSpan.innerText = `Today at ${createdDate.getHours()}:${createdDate.getMinutes()}`;
+                } else {
+                    ticketDateSpan.innerText = `${createdDate.toDateString()} at ${createdDate.getHours()}:${createdDate.getMinutes()}`
+                }
+            };
+        };
+    </script>
+</body>
+</html>
