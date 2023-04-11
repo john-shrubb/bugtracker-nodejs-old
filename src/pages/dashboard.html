@@ -31,6 +31,27 @@
 		.main-wrapper div > * {
 			padding-bottom: 5px;
 		}
+
+		.tickets-table {
+			padding: 15px;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+		table thead {
+			background: var(--colours-orange);
+			color: white;
+		}
+
+		table tr td {
+			padding: 10px;
+		}
+
+		table tbody tr:nth-child(2n) {
+			background: #e9e9e9;
+		}
 	</style>
 </head>
 <body>
@@ -61,19 +82,66 @@
 					<span class="stat">0</span>
 				</div>
 			</div>
+			<div class="tickets-table">
+				<h3>At a glance</h3>
+				<p>View some recent tickets, you can search for more tickets on the <a href="/tickets/view">view tickets</a> page.</p>
+				<table>
+					<thead>
+						<tr>
+							<td>Title</td>
+							<td>Description</td>
+							<td>Author</td>
+							<td>View Ticket</td>
+						</tr>
+					</thead>
+					<tbody id="ticketTableBody">
+						<tr>
+							<td>Please wait...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 
 	<script>
-		// Everything to do with tickets
-
-		async function getTickets() {
+		// Get user by ID
+		
+		async function getUserById(userID) {
 			return await new Promise(function (resolve) {
 				const request = new XMLHttpRequest();
-				request.open('get', '/api/tickets/list');
-				request.send();
+				request.open('post', '/api/users/get/id');
+				request.setRequestHeader('Content-Type', 'application/json');
+				request.send(JSON.stringify({
+					userID: userID,
+				}));
 				request.onload = function() {
 					resolve(JSON.parse(request.responseText));
+				};
+			});
+		}
+
+		// Everything to do with tickets
+
+		async function getTickets(ticketCount) {
+			if (isNaN(ticketCount) || Number(ticketCount) < 0) {
+				throw new TypeError('Invalid amount of tickets to return.');
+			}
+			return await new Promise(function (resolve) {
+				const request = new XMLHttpRequest();
+				request.open('get', '/api/tickets/list/' + ticketCount);
+				request.send();
+				request.onload = function() {
+					const response = JSON.parse(request.responseText);
+					if (response['status'] !== 200) {
+						throw new Error(response['response']);
+					}
+
+					for (let ticketIndex in response['response']) {
+						response['response'][ticketIndex]['created_on'] = new Date(response['response'][ticketIndex]['created_on']);
+					}
+
+					resolve(response['response']);
 				};
 			});
 		}
@@ -81,7 +149,7 @@
 		async function updateDashboard() {
 			// Total tickets visible to user
 
-			const ticketList = await getTickets();
+			const ticketList = await getTickets(0);
 
 			document.getElementById('totalTickets').querySelector('span').innerHTML = ticketList.length;
 
@@ -118,6 +186,44 @@
 		}
 
 		updateDashboard();
+
+		async function updateTicketTable() {
+			const allTickets = await getTickets(0);
+			const ticketTableBody = document.getElementById('ticketTableBody');
+
+			ticketTableBody.innerHTML = '';
+
+			for (const ticketIndex in allTickets) {
+				const ticket = allTickets[ticketIndex];
+				if (ticket['status'] === 3) {
+					continue;
+				}
+				const tableRow = document.createElement('tr');
+				const ticketAuthor = (await getUserById(ticket['user_id']))['response'];
+
+				const ticketTitle = document.createElement('td');
+				ticketTitle.innerText = ticket['title'];
+
+				const ticketDescription = document.createElement('td');
+				ticketDescription.innerText = ticket['description'];
+
+				const ticketAuthorTag = document.createElement('td');
+				ticketAuthorTag.innerText = ticketAuthor['username'];
+
+				const ticketVisitLink = document.createElement('td');
+				ticketVisitLink.innerHTML = `<a href="/tickets/view?ticket=${ticket['ticket_id']}">View Ticket</a>`;
+
+				tableRow.appendChild(ticketTitle);
+				tableRow.appendChild(ticketDescription);
+				tableRow.appendChild(ticketAuthorTag);
+				tableRow.appendChild(ticketVisitLink);
+
+
+				ticketTableBody.appendChild(tableRow);
+			}
+		};
+
+		updateTicketTable();
 	</script>
 	<script src="/assets/js/updateUsername.js"></script>
 </body>
