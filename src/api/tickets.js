@@ -16,6 +16,7 @@ const app = Express();
 
 const verifyIDFormat = require('../utils/verifyIDFormat');
 const IDGen = require('../utils/idgen');
+const canAccessTicket = require('../utils/canAccessTicket');
 
 /**
  * List all available tickets
@@ -120,40 +121,23 @@ app.post('/api/tickets/get', async (req, res) => {
 	}
 
 	// Grab
-	// - Role of the user, covered in ./doc/users.md
-	// - Details of the ticket, to both determine if the user is
-	//   allowed to access the ticket and to return the details
-	//   to the user.
-	// - Whether the user was assigned to the ticket to determine
-	//   if the user is allowed to see the ticket and to set the
+	// - Details of the ticket, to return the details to the user
+	// - Whether the user was assigned to the ticket to set the
 	//   "assigned" variable.
 
-	const userRole = (await database.query('SELECT role FROM users WHERE user_id=$1', [req.oidc.userID])).rows[0]['role'];
 	const ticketDetails = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
 	const userAssignmentDetails = (await database.query('SELECT * FROM userassignments WHERE ticket_id=$1 AND user_id=$2', [ticketID, req.oidc.userID])).rows[0];
 
-	// Return error if ticket does not exist.
+	// Return error if ticket does not exist OR user cannot
+	// access ticket.
 
-	if (!ticketDetails) {
-		res.statusCode = 400;
+	if (!ticketDetails || !await canAccessTicket(req.oidc.userID, ticketID)) {
+		res.statusCode = 403;
 		res.json({
-			status: 400,
-			response: 'Ticket could not be found or you are unable to access it.',
+			status: 403,
+			response: 'Either the ticket does not exist or you do not have sufficient permissions to access the ticket.',
 		});
 		return;
-	}
-
-	// Return error if user is not allowed to access the ticket.
-
-	if (userRole === 1 || ticketDetails['user_id'] !== req.oidc.userID) {
-		if (!userAssignmentDetails) {
-			res.statusCode = 400;
-			res.json({
-				status: 400,
-				response: 'Ticket could not be found or you are unable to access it.',
-			});
-			return;
-		}
 	}
 
 	// The errors above return the exact same response for

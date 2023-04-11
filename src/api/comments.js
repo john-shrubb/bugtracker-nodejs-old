@@ -14,6 +14,7 @@ const database = require('../db');
 
 const IDGen = require('../utils/idgen');
 const verifyIDFormat = require('../utils/verifyIDFormat');
+const canAccessTicket = require('../utils/canAccessTicket');
 
 /**
  * List comments on a ticket
@@ -85,6 +86,7 @@ app.get('/api/comments/get/:id', async (req, res) => {
 
 app.post('/api/comments/create/:ticketid', async (req, res) => {
 	const ticketID = req.params.ticketid;
+	const userID = req.oidc.userID;
 
 	const commentContent = req.body['content'].trim();
 
@@ -105,28 +107,13 @@ app.post('/api/comments/create/:ticketid', async (req, res) => {
 	}
 
 	const ticketDetails = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID])).rows;
-	if (!ticketDetails) {
-		res.statusCode = 404;
+	if (!ticketDetails.length || !await canAccessTicket(userID, ticketID)) {
+		res.statusCode = 403;
 		res.json({
-			status: 404,
-			response: 'Ticket doesn\'t exist or you don\'t have sufficient permissions to create comments on it.',
+			status: 403,
+			response: 'Ticket either doesn\'t exist or you have insufficient permissions to create a comment on it.',
 		});
-		return;
 	}
-
-	const userRole = await (database.query('SELECT role FROM users WHERE user_id=$1', [req.oidc.userID])).rows[0]['role'];
-	if (userRole === 1 && ticketDetails['user_id'] !== req.oidc.userID) {
-		const assignedTickets = await (database.query('SELECT * FROM userassignments WHERE user_id=$1;', [req.oidc.userID])).rows;
-		if (!assignedTickets) {
-			res.statusCode = 404;
-			res.json({
-				status: 404,
-				response: 'Ticket doesn\'t exist or you don\'t have sufficient permissions to create comments on it.',
-			});
-			return;
-		}
-	}
-
 	let commentID;
 	let validID = false; // Part of below validation
 
