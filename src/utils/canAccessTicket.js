@@ -1,3 +1,12 @@
+/**
+ * canAccessTicket.js
+ * 
+ * Checks to see if a user is allowed to see/access a ticket.
+ * 
+ * Does not verify that the user can MANAGE a ticket, this check
+ * is performed in ./canManageTicket.js
+ */
+
 const IDFormatChecker = require('./verifyIDFormat');
 const database = require('../db');
 
@@ -9,7 +18,6 @@ const canAccessTicket = async (userID, ticketID) => {
 	}
 
 	// Get the user's role, and also check they exist
-	console.log('a');
 
 	const userRole = (await database.query('SELECT role FROM users WHERE user_id=$1;', [userID])).rows[0];
 

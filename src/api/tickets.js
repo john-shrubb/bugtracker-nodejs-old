@@ -17,6 +17,7 @@ const app = Express();
 const verifyIDFormat = require('../utils/verifyIDFormat');
 const IDGen = require('../utils/idgen');
 const canAccessTicket = require('../utils/canAccessTicket');
+const canManageTicket = require('../utils/canManageTicket');
 
 /**
  * List all available tickets
@@ -254,10 +255,6 @@ app.post('/api/tickets/assign', async (req, res) => {
 
 	const userID = req.oidc.userID;
 
-	// Pull user details
-
-	const userDetails = (await database.query('SELECT * FROM users WHERE user_id=$1;', [userID])).rows[0];
-
 	// Get ticket id and id of user who is getting
 	// assigned the ticket from request body
 
@@ -272,47 +269,31 @@ app.post('/api/tickets/assign', async (req, res) => {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
-			response: 'Invalid or missing ticketID or userID',
+			response: 'Invalid or missing ticket ID or user ID',
 		});
 		return;
 	}
 
-	// Check user priveleges. If they are not a manager or owner
-	// then they cannot assign tickets that they do not own.
-
-	if (userDetails['role'] === 1) {
-		let userTickets = await database.query('SELECT * FROM tickets WHERE user_id=$1;', [userID]);
-		userTickets = userDetails.rows;
-
-		if (!userTickets) {
-			res.statusCode = 403;
-			res.json({
-				status: 403,
-				response: 'Either you do not have permission to assign this ticket or it does not exist.',
-			});
-			return;
-		}
-	}
-
 	// Validation to check that both the user and the ticket
 	// being assigned actually exist.
-	const validateTicketQ = await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID]);
-	const validateUserQ = await database.query('SELECT * FROM users WHERE user_id=$1', [toBeAssignedID]);
+	const validateTicketQ = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
+	const validateUserQ = (await database.query('SELECT * FROM users WHERE user_id=$1', [toBeAssignedID])).rows[0];
 
-	// Return error if the ticket being assigned does not exist.
-
-	if (!validateTicketQ.rows.length) {
-		res.statusCode = 400;
+	// Checks to:
+	// - Check that the ticket exists
+	// - Check that the user has permissions to manage the ticket
+	if (!validateTicketQ || !await canManageTicket(userID, ticketID)) {
+		res.statusCode = 403;
 		res.json({
-			status: 400,
-			response: 'Either you do not have permission to assign this ticket or it does not exist.',
+			status: 403,
+			response: 'Either the ticket you are trying to assign does not exist or you have insufficient permissions to manage it.',
 		});
 		return;
 	}
 
 	// Error if the user being assigned to ticket doesn't exist.
 
-	if (!validateUserQ.rows.length) {
+	if (!validateUserQ) {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
@@ -359,36 +340,15 @@ app.post('/api/tickets/delete', async (req, res) => {
 
 	const ticket = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
 
-	if (!ticket) {
-		console.log('missing ticket');
-		console.log(ticketID);
-		console.log(ticket);
+	// Check permission for user to delete the ticket
+
+	if (!ticket || !await canManageTicket(req.oidc.userID, ticketID)) {
 		res.statusCode = 403;
 		res.json({
 			status: 403,
 			response: 'Ticket does not exist or you do not have permission to delete it.',
 		});
 		return;
-	}
-
-	// Check permission for user to delete the ticket
-
-	const user = (await database.query('SELECT * FROM users WHERE user_id=$1;', [req.oidc.userID])).rows[0];
-
-	// Users who are a manager or a owner can delete any ticket.
-
-	if (!user.role >= 2) {
-		// Only ticket owners can delete their own ticket.
-		console.log('actually insufficient perms');
-
-		if (!ticket['user_id'] !== req.oidc.user_id) {
-			res.statusCode = 403;
-			res.json({
-				status: 403,
-				response: 'Ticket does not exist or you do not have permission to delete it.',
-			});
-			return;
-		}
 	}
 
 	// Past this point it is assumed all validation
