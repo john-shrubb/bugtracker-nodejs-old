@@ -104,23 +104,8 @@
 		</div>
 	</div>
 
+	<script src="/assets/js/getUserById.js"></script>
 	<script>
-		// Get user by ID
-		
-		async function getUserById(userID) {
-			return await new Promise(function (resolve) {
-				const request = new XMLHttpRequest();
-				request.open('post', '/api/users/get/id');
-				request.setRequestHeader('Content-Type', 'application/json');
-				request.send(JSON.stringify({
-					userID: userID,
-				}));
-				request.onload = function() {
-					resolve(JSON.parse(request.responseText));
-				};
-			});
-		}
-
 		// Everything to do with tickets
 
 		async function getTickets(ticketCount) {

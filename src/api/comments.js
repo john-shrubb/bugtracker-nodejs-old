@@ -38,38 +38,25 @@ app.get('/api/comments/get/:id', async (req, res) => {
 		});
 	}
 
-	const ticketOwner = await (database.query('SELECT user_id FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
+	const ticketOwner = (await database.query('SELECT user_id FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
 
-	if (!ticketOwner) {
-		res.status = 404;
+	if (!ticketOwner || !canAccessTicket(req.oidc.userID, ticketID)) {
+		res.statusCode = 403;
 		res.json({
-			status: 404,
-			response: 'The ticket was not found or you are forbidden from accessing it.',
+			status: 403,
+			response: 'This ticket does not exist or you are forbidden from accessing comments on it.',
 		});
 		return;
 	}
 
-	const userRole = await (database.query('SELECT role FROM users WHERE user_id=$1', [req.oidc.userID])).rows[0]['role'];
-	if (userRole === 1 && ticketOwner['user_id'] !== req.oidc.userID) {
-		const assignedTickets = await (database.query('SELECT * FROM userassignments WHERE user_id=$1;', [req.oidc.userID])).rows;
-		if (!assignedTickets) {
-			res.statusCode = 404;
-			res.json({
-				status: 404,
-				response: 'The ticket was not found or you are forbidden from accessing it.',
-			});
-			return;
-		}
-	}
-
-	const allComments = await (database.query('SELECT * FROM comments WHERE ticket_id=$1', [ticketID])).rows;
+	const allComments = (await database.query('SELECT * FROM comments WHERE ticket_id=$1', [ticketID])).rows;
 
 	const response = {
 		status: 200,
 		response: allComments,
 	};
 
-	res.json(response);
+	res.json(JSON.stringify(response));
 });
 
 /**

@@ -8,46 +8,105 @@
 
 	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
 	<style>
-        div.main-wrapper {
-            padding: 15px;
-        }
+		div.main-wrapper {
+			padding: 15px;
+		}
 
-        #authorPFP {
-            height: 30px;
-            border-radius: 15px;
-            display: block;
-            float: left;
-        }
+		#authorPFP {
+			height: 30px;
+			border-radius: 15px;
+			display: block;
+			float: left;
+		}
 
-        #author-username {
-            font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
-            float: left;
-            font-size: 1.25rem;
-            height: 30px;
-            line-height: 30px;
-            padding-left: 5px;
-        }
+		#author-username {
+			font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
+			float: left;
+			font-size: 1.25rem;
+			height: 30px;
+			line-height: 30px;
+			padding-left: 5px;
+		}
 
-        #timestamp {
-            color: #c2c2c2;
-            line-height: 30px;
-            padding-left: 20px;
-        }
-        p {
-            font-size: 1.5rem;
-        }
+		#timestamp {
+			color: #c2c2c2;
+			line-height: 30px;
+			padding-left: 20px;
+		}
+		p {
+			font-size: 1.5rem;
+		}
 
-        button {
-            width: max-content;
-            display: block;
-            font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
-            font-size: 1.25rem;
-            padding: 5px;
-            color: #000000;
-            background: transparent;
-            border: 3px solid var(--colours-orange);
-        }
-    </style>
+		button {
+			width: max-content;
+			display: block;
+			font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
+			font-size: 1.25rem;
+			padding: 5px;
+			color: #000000;
+			background: transparent;
+			border: 3px solid var(--colours-orange);
+		}
+
+		#writeCommentTextBox {
+			width: calc(100% - 36px);
+			font-size: 1.25rem;
+			padding: 15px;
+			border: 3px #919191 solid;
+			margin-top: 10px;
+		}
+
+		#writeCommentTextBox:focus {
+			outline: 0;
+			border-color: var(--colours-orange);
+		}
+
+		#comments-table {
+			width: 100%;
+			margin-top: 5px;
+		}
+
+		#comments-table td {
+			vertical-align: top;
+			padding: 5px;
+		}
+
+		#comments-table td.td-pfp img  {
+			height: 40px;
+			border-radius: 20px;
+		}
+
+		#comments-table td.td-pfp {
+			width: 40px;
+		}
+
+		#comments-table td.comment-details-td {
+			height: 44px;
+			width: 200px;
+		}
+		#comments-table td div.comment-details {
+			display: flex;
+			flex-direction: column;
+			vertical-align: middle;
+		}
+
+		#comments-table td div.comment-details span:first-child {
+			text-overflow: ellipsis;
+			height: 21px;
+			white-space: nowrap;
+			width: 200px;
+			overflow: hidden;
+		}
+
+		#comments-table td div.comment-details span:last-child {
+			font-size: 0.8rem;
+			color: #c5c5c5;
+		}
+
+		#comments-table td.comment-description {
+			vertical-align: middle;
+		}
+	</style>
 	</head>
 <body>
 	<div class="body-wrapper">
@@ -63,158 +122,239 @@
 			<a href="/logout">Logout</a>
 		</div>
 		<div class="main-wrapper">
-            <div class="ticket-content-wrapper">
-                <h3 id="ticket-title">Loading title...</h3>
-                <span class="author-span">
-                    <img id="authorPFP" src="" referrerpolicy="no-referrer" alt="Author Profile Picture">
-                    <span id="author-username">Loading author</span>
-                    <span id="timestamp">Loading time...</span>
-                </span>
-                <p id="ticket-description">Loading ticket description...</p>
-            </div>
+			<div class="ticket-content-wrapper">
+				<h3 id="ticket-title">Loading title...</h3>
+				<span class="author-span">
+					<img id="authorPFP" src="" referrerpolicy="no-referrer" alt="Author Profile Picture">
+					<span id="author-username">Loading author</span>
+					<span id="timestamp">Loading time...</span>
+				</span>
+				<p id="ticket-description">Loading ticket description...</p>
+			</div>
 
-            <div class="ticket-toolbar">
-                <button onclick="deleteTicket()">Delete Ticket</button>
-            </div>
+			<div class="ticket-toolbar">
+				<button onclick="deleteTicket()">Delete Ticket</button>
+			</div>
 
-            <div class="comments-wrapper">
-                <input type="text" id="writeCommentTextBox" placeholder="Write a comment..." name="writeCommentTextBox">
-                <button id="createCommentButton">Create</button>
-                
-            </div>
+			<div class="comments-wrapper">
+				<div class="comment-inp-wrapper">
+					<input type="text" id="writeCommentTextBox" placeholder="Type then press enter to create a comment..." name="writeCommentTextBox">
+				</div>
+				<table id="comments-table">
+					<tbody id="comments-table-body"></tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 
 	<script src="/assets/js/updateUsername.js"></script>
-    <script>
-        // Grab multiple very important variables. Is supposed to access the DOM as much as
-        // is required at the beginning for optimisation purposes.
+	<script src="/assets/js/getUserById.js"></script>
+	<script>
+		// Grab multiple very important variables. Is supposed to access the DOM as much as
+		// is required at the beginning for optimisation purposes.
 
-        const query = new URLSearchParams(window.location.search);
-        const ticketTitleElement = document.getElementById('ticket-title');
-        const ticketTitleDescription = document.getElementById('ticket-description');
-        const authorProfilePicture = document.getElementById('authorPFP');
-        const authorUsernameSpan = document.getElementById('author-username');
-        const createCommentButton = document.getElementById('createCommentButton');
+		const query = new URLSearchParams(window.location.search);
+		const ticketTitleElement = document.getElementById('ticket-title');
+		const ticketTitleDescription = document.getElementById('ticket-description');
+		const authorProfilePicture = document.getElementById('authorPFP');
+		const authorUsernameSpan = document.getElementById('author-username');
+		const commentTextbox = document.getElementById('writeCommentTextBox')
 
-        // Will be defined later on, look in the mess that is two functions inside of eachother.
+		// Will be defined later on, look in the mess that is two functions inside of eachother.
 
-        let ticketDetails;
-        let authorDetails;
+		let ticketDetails;
+		let authorDetails;
 
-        // Just redirects to dashboard if there isn't a ticket ID.
+		// Just redirects to dashboard if there isn't a ticket ID.
 
-        if (!query.has('ticket')) {
-            window.location.replace('/dashboard');
-        }
+		if (!query.has('ticket')) {
+			window.location.replace('/dashboard');
+		}
 
-        // Get ?ticket=123 stuff from URL
+		// Get ?ticket=123 stuff from URL
 
-        const ticketID = query.get('ticket');
+		const ticketID = query.get('ticket');
 
-        // Make a request to fetch the details of the ticket.
+		// Make a request to fetch the details of the ticket.
 
-        const ticketRequest = new XMLHttpRequest();
-        ticketRequest.open('get', '/api/tickets/get/' + ticketID);
-        ticketRequest.send();
-        
-        // Set the title & description of the ticket
+		const ticketRequest = new XMLHttpRequest();
+		ticketRequest.open('get', '/api/tickets/get/' + ticketID);
+		ticketRequest.send();
+		
+		// Set the title & description of the ticket
 
-        ticketRequest.onload = () => {
-            // Parse JSON response
-            ticketDetails = JSON.parse(ticketRequest.responseText);
+		ticketRequest.onload = () => {
+			// Parse JSON response
+			ticketDetails = JSON.parse(ticketRequest.responseText);
 
-            if (ticketDetails['status'] !== 200) {
-                alert('Ticket does not exist or you have insufficient permissions to access it!');
-                return window.location.replace('/dashboard');
-            }
-            ticketDetails = ticketDetails['response'];
+			if (ticketDetails['status'] !== 200) {
+				alert('Ticket does not exist or you have insufficient permissions to access it!');
+				return window.location.replace('/dashboard');
+			}
+			ticketDetails = ticketDetails['response'];
 
-            // Set title and description of ticket
+			// Set title and description of ticket
 
-            ticketTitleElement.innerText = ticketDetails['title'];
-            ticketTitleDescription.innerText = ticketDetails['description'];
+			ticketTitleElement.innerText = ticketDetails['title'];
+			ticketTitleDescription.innerText = ticketDetails['description'];
 
-            // Set date & time of ticket. Displays as "today" instead of a full date if it was created today.
+			// Set date & time of ticket. Displays as "today" instead of a full date if it was created today.
 
-            const createdDate = new Date(ticketDetails['created_on']); // Date of ticket creation
-            const ticketDateSpan = document.getElementById('timestamp'); // The #timestamp HTML element
-            if (createdDate.toDateString() === new Date().toDateString()) { // Was the ticket created today?
-                ticketDateSpan.innerText = `Today at ${createdDate.getHours().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}:${createdDate.getMinutes().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}`;
-                //                          "Today at 10:54"
-            } else {
-                ticketDateSpan.innerText = `${createdDate.toDateString()} at ${createdDate.getHours()}:${createdDate.getMinutes()}`
-                //                         "Thu Apr 06 2023 at 10:56"
-            }
+			const createdDate = new Date(ticketDetails['created_on']); // Date of ticket creation
+			const ticketDateSpan = document.getElementById('timestamp'); // The #timestamp HTML element
+			if (createdDate.toDateString() === new Date().toDateString()) { // Was the ticket created today?
+				ticketDateSpan.innerText = `Today at ${createdDate.getHours().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}:${createdDate.getMinutes().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}`;
+				//                          "Today at 10:54"
+			} else {
+				ticketDateSpan.innerText = `${createdDate.toDateString()} at ${createdDate.getHours()}:${createdDate.getMinutes()}`
+				//                         "Thu Apr 06 2023 at 10:56"
+			}
 
-            // Open a request to get the details of the author of the ticket.
+			// Open a request to get the details of the author of the ticket.
 
-            const authorRequest = new XMLHttpRequest();
-            authorRequest.open('post', '/api/users/get/id');
-            authorRequest.setRequestHeader('Content-Type', 'application/json');
-            authorRequest.send(JSON.stringify({
-                'userID': ticketDetails['user_id'],
-            }));
+			const authorRequest = new XMLHttpRequest();
+			authorRequest.open('post', '/api/users/get/id');
+			authorRequest.setRequestHeader('Content-Type', 'application/json');
+			authorRequest.send(JSON.stringify({
+				'userID': ticketDetails['user_id'],
+			}));
 
-            authorRequest.onload = () => {
-                authorDetails = JSON.parse(authorRequest.responseText)['response'];
+			authorRequest.onload = () => {
+				authorDetails = JSON.parse(authorRequest.responseText)['response'];
 
-                authorUsernameSpan.innerText = authorDetails['username'] ? authorDetails['username'] : 'Deleted User'; // Set username
-                authorProfilePicture.src = authorDetails['profilepic']; // Set PFP
-            };
-        };
+				authorUsernameSpan.innerText = authorDetails['username'] ? authorDetails['username'] : 'Deleted User'; // Set username
+				authorProfilePicture.src = authorDetails['profilepic']; // Set PFP
+			};
+		};
 
-        const deleteTicket = () => {
-            const request = new XMLHttpRequest();
-            request.open('post', '/api/tickets/delete');
-            request.setRequestHeader('Content-Type', 'application/json');
-            request.send(JSON.stringify({
-                ticketID: ticketID,
-            }));
+		const deleteTicket = () => {
+			const request = new XMLHttpRequest();
+			request.open('post', '/api/tickets/delete');
+			request.setRequestHeader('Content-Type', 'application/json');
+			request.send(JSON.stringify({
+				ticketID: ticketID,
+			}));
 
-            request.onload = () => {
-                const results = JSON.parse(request.responseText);
+			request.onload = () => {
+				const results = JSON.parse(request.responseText);
 
-                if (results['status'] !== 200) {
-                    alert(results['response']);
-                } else {
-                    window.location.replace('/dashboard');
-                }
-            };
-        };
+				if (results['status'] !== 200) {
+					alert(results['response']);
+				} else {
+					window.location.replace('/dashboard');
+				}
+			};
+		};
 
-        // Comments
+		// Comments
 
-        createCommentButton.addEventListener('click', () => {
-            const commentContent = document.getElementById('writeCommentTextBox').value.trim();
+		commentTextbox.addEventListener('keypress', (event) => {
 
-            console.log(commentContent);
+			if (event.key !== 'Enter') return;
 
-            if (!commentContent) {
-                alert('Can\'t create an empty comment!');
-                return;
-            }
+			commentContent = commentTextbox.value.trim();
 
-            // /api/comments/create/ticketid
+			if (!commentContent) {
+				return;
+			}
 
-            const createCommentReq = new XMLHttpRequest();
-            createCommentReq.open('post', '/api/comments/create/' + ticketID);
-            createCommentReq.setRequestHeader('Content-Type', 'application/json');
-            createCommentReq.send(JSON.stringify({
-                content: commentContent,
-            }));
+			// /api/comments/create/ticketid
 
-            createCommentReq.onload = () => {
-                const createCommentResponse = JSON.parse(createCommentReq.responseText);
+			const createCommentReq = new XMLHttpRequest();
+			createCommentReq.open('post', '/api/comments/create/' + ticketID);
+			createCommentReq.setRequestHeader('Content-Type', 'application/json');
+			createCommentReq.send(JSON.stringify({
+				content: commentContent,
+			}));
 
-                if (createCommentResponse['status'] !== 200) {
-                    alert(createCommentResponse['response']);
-                    return;
-                }
+			createCommentReq.onload = () => {
+				const createCommentResponse = JSON.parse(createCommentReq.responseText);
 
-                window.location.reload();
-            };
-        });
-    </script>
+				if (createCommentResponse['status'] !== 200) {
+					alert(createCommentResponse['response']);
+					return;
+				}
+
+				window.location.reload();
+			};
+		});
+
+		// Update the comments table
+
+		async function updateCommentsTable() {
+			/*
+			<tr>
+				<td class="td-pfp">
+					<img referrerpolicy="no-referrer" src="https://lh3.googleusercontent.com/a/AGNmyxbVATveCkSyzf9fkwdHsQ3VPOnRwTXspxyHLE-o=s96-c" alt="Comment Author Profile Picture">
+				</td>
+				<td class="comment-details-td">
+					<div class="comment-details">
+						<span class="author-name">Author NameAuthor NameAuthor NameAuthor NameAuthor Name</span>
+						<span class="comment-date">Mon Apr 10 2023 at 12:13</span>
+					</div>
+				</td>
+				<td class="comment-desc">Comment Description</td>
+			</tr>
+			*/
+		   const commentsTable = document.getElementById('comments-table-body');
+
+		   const getCommentsReq = new XMLHttpRequest();
+		   getCommentsReq.open('get', '/api/comments/get/' + ticketID);
+		   getCommentsReq.send();
+
+		   getCommentsReq.onload = async function() {
+				const listResponse = JSON.parse(JSON.parse(getCommentsReq.responseText)); // God knows why I have to parse this twice :(
+				listResponse['response'].sort((a, b) => {
+					return new Date(b['created_on']) - new Date(a['created_on']);
+				});
+				if (listResponse['status'] !== 200) {
+					alert(listResponse['response']);
+					return;
+				}
+				for (const commentIndex in listResponse['response']) {
+					const comment = listResponse['response'][commentIndex];
+					const commentAuthor = (await getUserById(comment['user_id']))['response'];
+
+					const TableRow = document.createElement('tr');
+
+					const tdPFP = document.createElement('td');
+					tdPFP.classList.add('td-pfp');
+					tdPFP.innerHTML = `<img referrerpolicy="no-referrer" src="${commentAuthor['profilepic']}" alt="Comment Author Profile Picture">`;
+					TableRow.appendChild(tdPFP);
+
+
+					const commentDetails = document.createElement('td');
+					commentDetails.classList.add('comment-details-td')
+					const commentDetailsDiv = document.createElement('div');
+
+					commentDetailsDiv.classList.add('comment-details');
+					commentDetails.appendChild(commentDetailsDiv);
+
+					const detailsAuthorName = document.createElement('span');
+					detailsAuthorName.classList.add('author-name');
+					detailsAuthorName.innerText = commentAuthor['username'];
+					commentDetailsDiv.appendChild(detailsAuthorName);
+
+					const detailsCreatedOn = document.createElement('span');
+					const commentCreatedDate = new Date(comment['created_on']);
+					detailsCreatedOn.classList.add('comment-date');
+					if (new Date().toDateString() === commentCreatedDate.toDateString()) {
+						detailsCreatedOn.innerText = `Today at ${commentCreatedDate.getHours().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}:${commentCreatedDate.getMinutes().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}`;
+					} else {
+						detailsCreatedOn.innerText = `${commentCreatedDate.toDateString()} at ${commentCreatedDate.getHours().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}:${commentCreatedDate.getMinutes().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}`;
+					}
+					commentDetailsDiv.appendChild(detailsCreatedOn);
+					TableRow.appendChild(commentDetails);
+
+					const commentDescription = document.createElement('td');
+					commentDescription.innerText = comment['content'];
+					TableRow.appendChild(commentDescription);
+
+					commentsTable.appendChild(TableRow);
+				}
+		   };
+		}
+		updateCommentsTable();
+	</script>
 </body>
 </html>
