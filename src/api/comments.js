@@ -96,6 +96,7 @@ app.post('/api/comments/create/:ticketid', async (req, res) => {
 			status: 400,
 			response: 'Invalid ticket ID',
 		});
+		return;
 	}
 
 	if (!commentContent) {
@@ -104,6 +105,7 @@ app.post('/api/comments/create/:ticketid', async (req, res) => {
 			status: 400,
 			response: 'Cannot create an empty comment!',
 		});
+		return;
 	}
 
 	const ticketDetails = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID])).rows;
@@ -113,6 +115,7 @@ app.post('/api/comments/create/:ticketid', async (req, res) => {
 			status: 403,
 			response: 'Ticket either doesn\'t exist or you have insufficient permissions to create a comment on it.',
 		});
+		return;
 	}
 	let commentID;
 	let validID = false; // Part of below validation
@@ -122,7 +125,7 @@ app.post('/api/comments/create/:ticketid', async (req, res) => {
 
 	while (!validID) {
 		commentID = IDGen(15);
-		validID = (await database.query('SELECT * FROM comments WHERE comment_id=$1', [commentID])).rows ? false : true;
+		validID = (await database.query('SELECT * FROM comments WHERE comment_id=$1;', [commentID])).rows[0] ? false : true;
 	}
 
 	await database.query('INSERT INTO comments (comment_id, ticket_id, user_id, content) VALUES ($1, $2, $3, $4);', [commentID, ticketID, req.oidc.userID, commentContent]);

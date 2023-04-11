@@ -63,15 +63,25 @@
 			<a href="/logout">Logout</a>
 		</div>
 		<div class="main-wrapper">
-            <h3 id="ticket-title">Loading title...</h3>
-            <span class="author-span">
-                <img id="authorPFP" src="" referrerpolicy="no-referrer" alt="Author Profile Picture">
-                <span id="author-username">Loading author</span>
-                <span id="timestamp">Loading time...</span>
-            </span>
-            <p id="ticket-description">Loading ticket description...</p>
+            <div class="ticket-content-wrapper">
+                <h3 id="ticket-title">Loading title...</h3>
+                <span class="author-span">
+                    <img id="authorPFP" src="" referrerpolicy="no-referrer" alt="Author Profile Picture">
+                    <span id="author-username">Loading author</span>
+                    <span id="timestamp">Loading time...</span>
+                </span>
+                <p id="ticket-description">Loading ticket description...</p>
+            </div>
 
-            <button onclick="deleteTicket()">Delete Ticket</button>
+            <div class="ticket-toolbar">
+                <button onclick="deleteTicket()">Delete Ticket</button>
+            </div>
+
+            <div class="comments-wrapper">
+                <input type="text" id="writeCommentTextBox" placeholder="Write a comment..." name="writeCommentTextBox">
+                <button id="createCommentButton">Create</button>
+                
+            </div>
 		</div>
 	</div>
 
@@ -84,7 +94,8 @@
         const ticketTitleElement = document.getElementById('ticket-title');
         const ticketTitleDescription = document.getElementById('ticket-description');
         const authorProfilePicture = document.getElementById('authorPFP');
-        const authorUsernameSpan = document.getElementById('author-username')
+        const authorUsernameSpan = document.getElementById('author-username');
+        const createCommentButton = document.getElementById('createCommentButton');
 
         // Will be defined later on, look in the mess that is two functions inside of eachother.
 
@@ -104,11 +115,8 @@
         // Make a request to fetch the details of the ticket.
 
         const ticketRequest = new XMLHttpRequest();
-        ticketRequest.open('post', '/api/tickets/get');
-        ticketRequest.setRequestHeader('Content-Type', 'application/json');
-        ticketRequest.send(JSON.stringify({
-            ticketID: ticketID,
-        }));
+        ticketRequest.open('get', '/api/tickets/get/' + ticketID);
+        ticketRequest.send();
         
         // Set the title & description of the ticket
 
@@ -132,7 +140,7 @@
             const createdDate = new Date(ticketDetails['created_on']); // Date of ticket creation
             const ticketDateSpan = document.getElementById('timestamp'); // The #timestamp HTML element
             if (createdDate.toDateString() === new Date().toDateString()) { // Was the ticket created today?
-                ticketDateSpan.innerText = `Today at ${createdDate.getHours()}:${createdDate.getMinutes()}`;
+                ticketDateSpan.innerText = `Today at ${createdDate.getHours().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}:${createdDate.getMinutes().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}`;
                 //                          "Today at 10:54"
             } else {
                 ticketDateSpan.innerText = `${createdDate.toDateString()} at ${createdDate.getHours()}:${createdDate.getMinutes()}`
@@ -174,6 +182,39 @@
                 }
             };
         };
+
+        // Comments
+
+        createCommentButton.addEventListener('click', () => {
+            const commentContent = document.getElementById('writeCommentTextBox').value.trim();
+
+            console.log(commentContent);
+
+            if (!commentContent) {
+                alert('Can\'t create an empty comment!');
+                return;
+            }
+
+            // /api/comments/create/ticketid
+
+            const createCommentReq = new XMLHttpRequest();
+            createCommentReq.open('post', '/api/comments/create/' + ticketID);
+            createCommentReq.setRequestHeader('Content-Type', 'application/json');
+            createCommentReq.send(JSON.stringify({
+                content: commentContent,
+            }));
+
+            createCommentReq.onload = () => {
+                const createCommentResponse = JSON.parse(createCommentReq.responseText);
+
+                if (createCommentResponse['status'] !== 200) {
+                    alert(createCommentResponse['response']);
+                    return;
+                }
+
+                window.location.reload();
+            };
+        });
     </script>
 </body>
 </html>
