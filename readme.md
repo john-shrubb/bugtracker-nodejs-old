@@ -18,6 +18,8 @@ See instructions to set up the bug tracker:
 Run `npm install` in the home directory to install the required packages.
 Outside of npm packages, I used PostgreSQL 15 and my node.js version was `v19.8.1` as of the time of writing.
 
+An Auth0 application will also be required for authentication.
+
 ### Database
 
 Right now the software is unable to set up a database on its own. However I plan to implement this at the end of development so please set the owner of the database to the user that will be used to access the database, for now is it assumed to be `bgbtrack`.
