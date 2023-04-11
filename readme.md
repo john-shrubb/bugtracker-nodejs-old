@@ -3,6 +3,8 @@ Bug Tracker node.js
 
 This is my attempt at creating a fully functional bug tracker in node.js, it utilises Auth0 for authentication, PostgreSQL for the ticketting and storing users, and Express for the web server, including the API.
 
+This project is intended to go on my portfolio and is not intended for commercial use.
+
 ## Documentation
 
 See all documentation in `./doc`. It is still being expanded upon however so there may be bits missing.
@@ -74,3 +76,24 @@ CREATE TABLE IF NOT EXISTS public.userassignments (
 
 ALTER TABLE public.userassignments OWNER TO bgtrack;
 ```
+
+### `.env` File
+
+A `.env` file should be present in the root of the project folder. It should contain the following variables in it.
+
+#### Auth0 Variables
+- `AUTH0SECRET` - Your secret for Auth0, use of OpenSSL to generate this value is recommended
+- `AUTH0ISSUERURL` - The issuer URL for your Auth0 application
+- `AUTH0CLIENTID` - The client ID for your Auth0 application
+
+#### PostgreSQL Variables
+
+- `PG_DATABASE` - The name of the database you are using for this application.
+- `PG_USER` - The username for the user you are using to access the database.
+- `PG_PASSWORD` - The password for the user.
+- `PG_PORT` - The port for your PostgreSQL instance.
+- `PG_HOST` - The IP address your PostgreSQL is on.
+
+## Running the project
+
+Use the command `npm run-script run` to start the web server. By default it listens on port `80` and if all goes well, there will be a message to console which reads `Server online on port 80`.
