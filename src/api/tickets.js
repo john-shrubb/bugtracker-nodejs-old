@@ -23,92 +23,42 @@ const canManageTicket = require('../utils/canManageTicket');
  * List all available tickets
  * GET endpoint
  * 
- * No body needed.
+ * :count should be the amount of tickets the user wants to list
  */
 
-app.get('/api/tickets/list', async (req, res) => {
+app.get('/api/tickets/list/:count', async (req, res) => {
 	const userID = req.oidc.userID;
-	const userDetails = (await database.query('SELECT * FROM users WHERE user_id=$1', [userID])).rows[0];
+	const ticketsToDisplay = req.params['count'];
 
-	if (userDetails.role >= 2) {
-		const allTickets = (await database.query('SELECT * FROM tickets;')).rows;
+	const allowedTickets = [];
 
-		for (const x in allTickets) {
-			if (allTickets[x]['user_id'] == userID) {
-				allTickets[x]['assigned'] = false;
-			} else {
-				allTickets[x]['assigned'] = true;
+	const allTickets = (await database.query('SELECT * FROM tickets;')).rows;
+
+	for (const ticketIndex in allTickets) {
+		const ticket = allTickets[ticketIndex];
+		if (await canAccessTicket(userID, ticket['ticket_id'])) {
+			allowedTickets.push(ticket);
+			if (allowedTickets.length == ticketsToDisplay) {
+				break;
 			}
 		}
-
-		res.end(JSON.stringify(allTickets));
-		return;
 	}
 
-	// Query for the tickets the user directly owns
-
-	const OwnedTickets = (await database.query('SELECT * FROM tickets WHERE user_id=$1;', [userID])).rows;
-
-	// Provide information on whether user was assigned the
-	// ticket or not in the output.
-	for (const x in OwnedTickets) {
-		OwnedTickets[x]['assigned'] = false;
-	}
-
-	// Query for tickets that are assigned to the user
-
-	const AssignedTickets = (await database.query('SELECT ticket_id FROM userassignments WHERE user_id=$1;', [userID])).rows;
-
-	// For each assigned ticket, query for all the ticket data
-	// and push it to the owned tickets array to be output to the
-	// endpoint
-
-	for (const x in AssignedTickets) {
-		// Grab the ticket ID from each ticket in the array
-		const ticketID = AssignedTickets[x]['ticket_id'];
-
-		// Use ticketID to find full ticket info
-
-		const ticket = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1', [ticketID])).rows;
-
-		// Push to OwnedTickets.
-
-		if (ticket[0]) {
-			// Provide information on whether user was assigned
-			// the ticket or not in the output.
-			ticket[0]['assigned'] = true;
-			OwnedTickets.push(ticket[0]);
-		}
-	}
-
-	res.end(JSON.stringify(OwnedTickets));
+	res.end(JSON.stringify({
+		status: 200,
+		response: allowedTickets,
+	}));
 });
 
 /**
  * Get a specific ticket by it's ID
- * POST endpoint
- * 
- * Body should look like
- * {
- * 		"ticketID": "937341038758329"
- * }
+ * GET endpoint
  */
 
-app.post('/api/tickets/get', async (req, res) => {
+app.get('/api/tickets/get/:ticketid', async (req, res) => {
 	// Get ticket ID from body of request.
 
-	const ticketID = req.body['ticketID'].trim();
-
-	// Presence check for ticket ID
-
-	if (!ticketID) {
-		res.statusCode = 400;
-		res.json({
-			status: 400,
-			response: 'Missing "ticketID" key in status body.',
-		});
-		return;
-	}
+	const ticketID = req.params['ticketid'];
 
 	// Verify format of ticket ID.
 
