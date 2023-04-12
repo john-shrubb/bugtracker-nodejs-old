@@ -23,6 +23,10 @@
         "indent": ["error", "tab"],
         "prefer-const": ["error"],
         "semi": ["error"],
-        "quotes": ["error", "single", { "allowTemplateLiterals": true }]
+        "quotes": ["error", "single", { "allowTemplateLiterals": true }],
+        "comma-dangle": ["error", {
+            "arrays": "never",
+            "objects": "always-multiline"
+        }]
     }
 }
