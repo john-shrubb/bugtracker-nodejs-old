@@ -378,8 +378,6 @@
 			// Get the tbody#comments-table-body element to append comments to
 			const commentsTable = document.getElementById('comments-table-body');
 
-			commentsTable.innerHTML = '';
-
 			async function deleteComment(commentID) {
 				if (isNaN(commentID) || commentID.length !== 15) {
 					throw new Error('Invalid comment ID.');
@@ -429,6 +427,7 @@
 				listResponse['response'].sort((a, b) => {
 					return new Date(b['created_on']) - new Date(a['created_on']);
 				});
+				const toAppend = [];
 				// For each ticket in the listResponse['response'] array
 				for (const commentIndex in listResponse['response']) {
 					// Get the comment itself and the details of the author of the comment. Also get user details for later on where
@@ -512,8 +511,14 @@
 
 					// Append all of that to the comments table.
 
-					commentsTable.appendChild(TableRow);
+					toAppend.push(TableRow);
 				}
+
+				commentsTable.innerHTML = '';
+
+				toAppend.forEach(function(TableRow) {
+					commentsTable.appendChild(TableRow);
+				})
 		   };
 		}
 
