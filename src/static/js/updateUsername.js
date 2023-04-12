@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 // Update username header in top right of page
 
 async function updateUsername() {

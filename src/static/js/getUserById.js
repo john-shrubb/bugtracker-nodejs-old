@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
 // Get user by ID
 		
 async function getUserById(userID) {
