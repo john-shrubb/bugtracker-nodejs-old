@@ -7,8 +7,7 @@
 	<title>Hello world!</title>
 
 	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-	<style>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />	<style>
 		div.main-wrapper {
 			padding: 15px;
 		}
@@ -38,15 +37,59 @@
 			font-size: 1.5rem;
 		}
 
-		button {
-			width: max-content;
-			display: block;
-			font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
+		.ticket-toolbar {
+			margin-top: 10px;
+			margin-bottom: 10px;
+			display: flex;
+			flex-direction: row;
+		}
+
+		.ticket-toolbar .status-buttons, .ticket-toolbar .priority-buttons {
+			display: flex;
+			flex-direction: row;
+			margin-left: 10px;
+		}
+
+		.ticket-toolbar .status-buttons button, .ticket-toolbar .priority-buttons button {
+			border: 0;
+			background: #dddddd;
+			color: black;
+			padding: 8px;
 			font-size: 1.25rem;
-			padding: 5px;
-			color: #000000;
+			padding-right: 13px;
+			padding-left: 13px;
+		}
+
+		.ticket-toolbar .status-buttons button:hover, .ticket-toolbar .priority-buttons button:hover {
+			background: #b4b4b4;
+		}
+
+		.ticket-toolbar .status-buttons button.active-button, .ticket-toolbar .priority-buttons button.active-button {
+			background: var(--colours-orange);
+			color: white;
+		}
+
+		.ticket-toolbar .status-buttons button:first-child, .ticket-toolbar .priority-buttons button:first-child {
+			border-top-left-radius: 10px;
+			border-bottom-left-radius: 10px;
+		}
+
+		.ticket-toolbar .status-buttons button:last-child, .ticket-toolbar .priority-buttons button:last-child {
+			border-top-right-radius: 10px;
+			border-bottom-right-radius: 10px;
+		}
+
+		.ticket-toolbar .delete-ticket-button {
 			background: transparent;
-			border: 3px solid var(--colours-orange);
+			padding-left: 10px;
+			padding-right: 10px;
+		}
+
+		.ticket-toolbar .material-symbols-outlined {
+			font-size: 20pt;
+			line-height: 42px;
+			color: black;
+			cursor: pointer;
 		}
 
 		#writeCommentTextBox {
@@ -113,10 +156,10 @@
 		}
 
 		button.delete-comment-button {
-			border: 0;
 			vertical-align: middle;
 			line-height: 40px;
 			font-size: 20px;
+			background: transparent;
 		}
 	</style>
 	</head>
@@ -145,7 +188,18 @@
 			</div>
 
 			<div class="ticket-toolbar">
-				<button onclick="deleteTicket()">Delete Ticket</button>
+				<button class="delete-ticket-button" onclick="deleteTicket()"><span title="Delete Ticket" class="material-symbols-outlined">delete</span></button>
+				<a href="/tickets/edit?" title="Edit ticket" id="ticketEditLink"><span class="material-symbols-outlined">edit</span></a>
+				<div class="status-buttons" title="Set status of the ticket">
+					<button onclick="setStatus(1)">Open</button>
+					<button onclick="setStatus(2)" class="active-button">WiP</button>
+					<button onclick="setStatus(3)">Closed</button>
+				</div>
+				<div class="priority-buttons" title="Set priority of the ticket">
+					<button onclick="setPriority(3)" class="active-button">High</button>
+					<button onclick="setPriority(2)">Medium</button>
+					<button onclick="setPriority(1)">Low</button>
+				</div>
 			</div>
 
 			<div class="comments-wrapper">
@@ -162,10 +216,18 @@
 	<script src="/assets/js/updateUsername.js"></script>
 	<script src="/assets/js/getUserById.js"></script>
 	<script>
+		const query = new URLSearchParams(window.location.search);
+
+		// Just redirects to dashboard if there isn't a ticket ID.
+
+		if (!query.has('ticket')) {
+			window.location.replace('/dashboard');
+			throw Error('No or invalid ticket ID. Redirecting to dashboard.'); // Throws an error to prevent any further execution of code and unecessary calls to the API.
+		}
+
 		// Grab multiple very important variables. Is supposed to access the DOM as much as
 		// is required at the beginning for optimisation purposes.
 
-		const query = new URLSearchParams(window.location.search);
 		const ticketTitleElement = document.getElementById('ticket-title');
 		const ticketTitleDescription = document.getElementById('ticket-description');
 		const authorProfilePicture = document.getElementById('authorPFP');
@@ -177,15 +239,11 @@
 		let ticketDetails;
 		let authorDetails;
 
-		// Just redirects to dashboard if there isn't a ticket ID.
-
-		if (!query.has('ticket')) {
-			window.location.replace('/dashboard');
-		}
-
 		// Get ?ticket=123 stuff from URL
 
 		const ticketID = query.get('ticket');
+
+		document.getElementById('ticketEditLink').href = '/tickets/edit?ticket=' + ticketID;
 
 		// Make a request to fetch the details of the ticket.
 
@@ -237,6 +295,9 @@
 				authorUsernameSpan.innerText = authorDetails['username'] ? authorDetails['username'] : 'Deleted User'; // Set username
 				authorProfilePicture.src = authorDetails['profilepic']; // Set PFP
 			};
+			updateCommentsTable();
+			updateToolbar();
+
 		};
 
 		const deleteTicket = () => {
@@ -287,7 +348,8 @@
 					return;
 				}
 
-				window.location.reload();
+				updateCommentsTable();
+				commentTextbox.value = '';
 			};
 		});
 
@@ -312,8 +374,9 @@
 			// Get the tbody#comments-table-body element to append comments to
 			const commentsTable = document.getElementById('comments-table-body');
 
+			commentsTable.innerHTML = '';
+
 			async function deleteComment(commentID) {
-				console.log(commentID);
 				if (isNaN(commentID) || commentID.length !== 15) {
 					throw new Error('Invalid comment ID.');
 				}
@@ -329,7 +392,7 @@
 						return;
 					}
 
-					window.location.reload();
+					updateCommentsTable();
 				};
 			}
 			// Make a request to get ALL the tickets for the ticket
@@ -429,11 +492,7 @@
 					TableRow.appendChild(commentDescription);
 
 					// Create a cell for the delete comment button IF the user owns the comment or they are a manager or above.
-					console.log( commentAuthor['userID'] === userDetails['response']['userID']);
-					console.log(commentAuthor);
-					console.log(userDetails['response']);
-					console.log(commentAuthor['userID']);
-					console.log(userDetails['response']['userID']);
+
 					if (userDetails['response']['role'] !== 1 || commentAuthor['userID'] === userDetails['response']['userID']) {
 						const deleteButtonTD = document.createElement('td');
 						const deleteButton = document.createElement('button');
@@ -441,7 +500,7 @@
 						deleteButton.addEventListener('click', function (ev) {
 							deleteComment(comment['comment_id']);
 						});
-						deleteButton.innerHTML = `<span style="width: 40px; height: 40px;" class="material-symbols-outlined">delete</span>`;
+						deleteButton.innerHTML = `<span title="Delete comment" style="width: 40px; height: 40px;" class="material-symbols-outlined">delete</span>`;
 						deleteButtonTD.appendChild(deleteButton);
 						deleteButtonTD.classList.add('delete-comment-td');
 						TableRow.appendChild(deleteButtonTD);
@@ -453,7 +512,98 @@
 				}
 		   };
 		}
-		updateCommentsTable();
+
+		function updateToolbar() {
+			const priorityButtons = Array.from(document.getElementsByClassName('priority-buttons')[0].children);
+			priorityButtons.forEach(function(element) {
+				element.classList.remove('active-button');
+			});
+
+			const ticketPriority = ticketDetails['priority'];
+
+			switch (ticketPriority) {
+				case 1:
+					priorityButtons[2].classList.add('active-button');
+					break;
+				case 2:
+					priorityButtons[1].classList.add('active-button');
+					break;
+				case 3:
+					priorityButtons[0].classList.add('active-button');
+					break;
+			}
+
+			const statusButtons = Array.from(document.getElementsByClassName('status-buttons')[0].children);
+			statusButtons.forEach(function(element) {
+				element.classList.remove('active-button');
+			});
+
+			const ticketStatus = ticketDetails['status'];
+
+			switch (ticketStatus) {
+				case 1:
+					statusButtons[0].classList.add('active-button');
+					break;
+				case 2:
+					statusButtons[1].classList.add('active-button');
+					break;
+				case 3:
+					statusButtons[2].classList.add('active-button');
+					break;
+			}
+		}
+
+		// Possible Priorities:
+		// 1 - Low
+		// 2 - Medium
+		// 3 - High
+
+		async function setPriority(priorityLevel) {
+			// Create request.
+			const request = new XMLHttpRequest();
+			// e.g: /api/tickets/573927534019375/setpriority/2
+			request.open('get', '/api/tickets/' + ticketID + '/setpriority/' + priorityLevel);
+			request.send();
+			request.onload = function() {
+				const response = JSON.parse(request.responseText);
+
+				// Handle issues with setting the priority. Mainly for debugging
+
+				if (response['status'] !== 200) {
+					alert(response['response']);
+					return;
+				}
+
+				// Set the new priority in the locally stored ticketDetails object.
+
+				ticketDetails['priority'] = Number(priorityLevel);
+
+				// Update the toolbar to reflect the new priority
+
+				updateToolbar();
+			};
+		}
+
+		// Possible statuses:
+		// 1 - Open
+		// 2 - WiP
+		// 3 - Closed
+
+		async function setStatus(status) {
+			const request = new XMLHttpRequest();
+			request.open('get', '/api/tickets/' + ticketID + '/setstatus/' + status);
+			request.send();
+			request.onload = function() {
+				const response = JSON.parse(request.responseText);
+				if (response['status'] !== 200) {
+					alert(response['response']);
+					return;
+				}
+
+				ticketDetails['status'] = Number(status);
+				updateToolbar();
+			};
+		}
 	</script>
 </body>
 </html>
