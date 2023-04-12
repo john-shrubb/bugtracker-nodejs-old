@@ -110,3 +110,24 @@ p, span, a {
     display: flex;
     flex-direction: column;
 }
+
+/*
+    Tables
+*/
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+table thead {
+    background: var(--colours-orange);
+    color: white;
+}
+
+table tr td {
+    padding: 10px;
+}
+
+table tbody tr:nth-child(2n) {
+    background: #e9e9e9;
+}

@@ -140,6 +140,12 @@ app.get('/tickets/view', (req, res) => {
 	res.end(file.toString());
 });
 
+app.get('/tickets/viewall', (req, res) => {
+	res.setHeader('Content-Type', 'text/html');
+	const file = fs.readFileSync('./src/pages/list-tickets.html');
+	res.statusCode = 200;
+	res.end(file.toString());
+});
 // Test error handler.
 
 app.get('/error', (_, __, next) => {

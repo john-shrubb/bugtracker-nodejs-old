@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Hello world!</title>
+
+	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
+	<style>
+		.view-tickets-block {
+			padding: 20px;
+		}
+
+		#searchTitleBox {
+			border: 3px #919191 solid;
+			padding: 10px;
+			font-size: 1.1rem;
+			margin-top: 8px;
+			margin-bottom: 8px;
+			width: calc(100% - 26px);
+		}
+
+		#searchTitleBox:focus {
+			border: 3px var(--colours-orange) solid;
+			outline: 0;
+		}
+	</style>
+	</head>
+<body>
+	<div class="body-wrapper">
+		<div class="top-title-bar">
+			<h3>Create Ticket</h3>
+			<h3 id="top-title-bar-username">Username</h3>
+		</div>
+		<div class="sidebar">
+			<a href="/dashboard">Dashboard</a>
+			<a href="/tickets/create">Create a Ticket</a>
+			<a href="/tickets/viewall">View Tickets</a>
+			<a href="/users/manage">User Management</a>
+			<a href="/logout">Logout</a>
+		</div>
+		<div class="main-wrapper">
+			<div class="view-tickets-block">
+				<h3>See all Tickets</h3>
+				<p>You can view all tickets here, in order of priority.</p>
+				<input type="text" name="searchTitle" id="searchTitleBox" placeholder="Search by title of ticket...">
+				<table>
+					<thead>
+						<tr>
+							<td>Title</td>
+							<td>Status</td>
+							<td>Priority</td>
+							<td>Author</td>
+							<td>View Ticket</td>
+						</tr>
+					</thead>
+					<tbody id="tickets-tbody">
+						<tr>
+							<td>Test Title</td>
+							<td>Lorem ipsum doret romanum...</td>
+							<td>High</td>
+							<td>John Shrubb</td>
+							<td><a href="#">View Ticket</a></td>
+						</tr>
+						<tr>
+							<td>Test Title</td>
+							<td>Lorem ipsum doret romanum...</td>
+							<td>High</td>
+							<td>John Shrubb</td>
+							<td><a href="#">View Ticket</a></td>
+						</tr>
+						<tr>
+							<td>Test Title</td>
+							<td>Lorem ipsum doret romanum...</td>
+							<td>High</td>
+							<td>John Shrubb</td>
+							<td><a href="#">View Ticket</a></td>
+						</tr>
+						<tr>
+							<td>Test Title</td>
+							<td>Lorem ipsum doret romanum...</td>
+							<td>High</td>
+							<td>John Shrubb</td>
+							<td><a href="#">View Ticket</a></td>
+						</tr>
+						
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<script src="/assets/js/getTickets.js"></script>
+	<script src="/assets/js/getUserByID.js"></script>
+	<script>
+		let allTickets;
+		const searchTitleBox = document.getElementById('searchTitleBox');
+		searchTitleBox.addEventListener('keyup', function() {
+			if (!searchTitleBox.value.trim()) {
+				listTickets(allTickets);
+			}
+			const tickets = allTickets.filter(function (ticket) {
+				if (ticket['title'].toLowerCase().includes(searchTitleBox.value)) {
+					return true;
+				}
+
+				return false;
+			});
+
+			listTickets(tickets);
+		});
+
+		(async function() {
+			allTickets = await getTickets(0);
+			listTickets(allTickets);
+		})();
+
+		async function listTickets(ticketArray) {
+			const ticketsTbody = document.getElementById('tickets-tbody');
+			// Sort by priority
+
+			ticketArray.sort(function (a, b) {
+				return b['priority'] - a['priority'];
+			});
+			const toAppend = [];
+
+			for (const ticketIndex in ticketArray) {
+				const ticket = ticketArray[ticketIndex];
+				const TableRow = document.createElement('tr');
+				
+				const ticketTitleTD = document.createElement('td');
+				ticketTitleTD.innerText = ticket['title'];
+				TableRow.appendChild(ticketTitleTD);
+
+				const ticketDescTD = document.createElement('td');
+				ticketDescTD.innerText = ticket['description'];
+				TableRow.appendChild(ticketDescTD);
+
+				const priorityTD = document.createElement('td');
+				priorityTD.innerText = ticket['priority'] === 3 ? 'High'
+									: ticket['priority'] === 2 ? 'Medium'
+									: 'Low';
+				TableRow.appendChild(priorityTD);
+
+				const authorTD = document.createElement('td');
+				const author = (await getUserById(ticket['user_id']))['response'].username;
+				authorTD.innerText = author;
+				TableRow.appendChild(authorTD);
+
+				const viewTicketTD = document.createElement('td');
+				viewTicketTD.innerHTML = `<a href="/tickets/view?ticket=${ticket['ticket_id']}">View Ticket</a>`;
+				TableRow.appendChild(viewTicketTD);
+
+				toAppend.push(TableRow);
+			};
+
+			ticketsTbody.innerHTML = ''; // Clear the table body
+
+
+			toAppend.forEach(function (value) {
+				ticketsTbody.appendChild(value);
+			});
+		}
+	</script>
+	<script src="/assets/js/updateUsername.js"></script>
+</body>
+</html>
