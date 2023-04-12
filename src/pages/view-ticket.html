@@ -350,6 +350,13 @@
 					return;
 				}
 
+				// Set table to just say no comments yet if there are none
+
+				if (!listResponse['response'][0]) {
+					commentsTable.innerHTML = '<tr><td>No comments yet.</td></tr>';
+					return;
+				}
+
 				// Sort tickets from most recent to oldest.
 
 				listResponse['response'].sort((a, b) => {
