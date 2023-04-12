@@ -1,0 +1,82 @@
+/**
+ * Assign a ticket.
+ * POST endpoint
+ * 
+ * Body should look like this
+ * {
+ * 		"ticketID": "135735729528475",
+ * 		"userID": "967463860136295"
+ * 		// This is the ID of the user being assigned.
+ * }
+ */
+
+const Express = require('express');
+const app = Express();
+
+const database = require('../../db');
+
+const canManageTicket = require('../../utils/canManageTicket');
+
+app.post('/api/tickets/assign', async (req, res) => {
+	// Pull User ID from request object
+
+	const userID = req.oidc.userID;
+
+	// Get ticket id and id of user who is getting
+	// assigned the ticket from request body
+
+	const ticketID = req.body['ticketID'].trim();
+	const toBeAssignedID = req.body['userID'].trim();
+
+	// Validate body to ensure user ID and ticket ID exist.
+	// There will be further validation later to ensure user and
+	// ticket exist to prevent the DB throwing an error.
+
+	if (!ticketID || !toBeAssignedID) {
+		res.statusCode = 400;
+		res.json({
+			status: 400,
+			response: 'Invalid or missing ticket ID or user ID',
+		});
+		return;
+	}
+
+	// Validation to check that both the user and the ticket
+	// being assigned actually exist.
+	const validateTicketQ = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
+	const validateUserQ = (await database.query('SELECT * FROM users WHERE user_id=$1', [toBeAssignedID])).rows[0];
+
+	// Checks to:
+	// - Check that the ticket exists
+	// - Check that the user has permissions to manage the ticket
+	if (!validateTicketQ || !await canManageTicket(userID, ticketID)) {
+		res.statusCode = 403;
+		res.json({
+			status: 403,
+			response: 'Either the ticket you are trying to assign does not exist or you have insufficient permissions to manage it.',
+		});
+		return;
+	}
+
+	// Error if the user being assigned to ticket doesn't exist.
+
+	if (!validateUserQ) {
+		res.statusCode = 400;
+		res.json({
+			status: 400,
+			response: 'The user you are attempting to assign does not exist.'
+		});
+		return;
+	}
+
+	// After this point it is assumed that all validation checks
+	// have been passed.
+
+	database.query('INSERT INTO userassignments (user_id, ticket_id, assigned_by) VALUES ($1, $2, $3);', [toBeAssignedID, ticketID, userID]);
+	res.json({
+		status: 200,
+		response: 'Succesfully assigned user to ticket.',
+	});
+});
+
+module.exports = app;

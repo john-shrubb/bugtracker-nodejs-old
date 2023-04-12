@@ -14,12 +14,19 @@ app.use((req, res, next) => {
 
 app.use(Express.json());
 
-const ticketsAPI = require('./api/tickets');
-const userAPI = require('./api/user');
-const commentsAPI = require('./api/comments');
+const fs = require('fs');
 
-app.use(ticketsAPI);
-app.use(userAPI);
-app.use(commentsAPI);
+const apiDirs = ['comments', 'tickets', 'users'];
+
+apiDirs.forEach(async directory => {
+	let endpoints = fs.readdirSync(__dirname + '/api/' + directory);
+	endpoints = endpoints.filter(value => {
+		return value.endsWith('.js');
+	});
+
+	endpoints.forEach(value => {
+		app.use(require(__dirname + '/api/' + directory + '/' + value));
+	});
+});
 
 module.exports = app;
