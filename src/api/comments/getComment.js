@@ -26,6 +26,7 @@ app.get('/api/comments/get/:id', async (req, res) => {
 			status: 400,
 			response: 'Invalid or missing ticket ID',
 		});
+		return;
 	}
 
 	const ticketOwner = (await database.query('SELECT user_id FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];

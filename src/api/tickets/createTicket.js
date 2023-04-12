@@ -34,7 +34,7 @@ app.post('/api/tickets/create', async (req, res) => {
 
 	// Get ticket title and description from request body.
 
-	const ticketTitle = req.body['title'].trim();
+	const ticketTitle = req.body['title'].trimEnd().trim();
 	const ticketDescription = req.body['description'].trim();
 
 	// Check they have a length.

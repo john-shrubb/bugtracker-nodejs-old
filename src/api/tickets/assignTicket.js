@@ -64,7 +64,7 @@ app.post('/api/tickets/assign', async (req, res) => {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
-			response: 'The user you are attempting to assign does not exist.'
+			response: 'The user you are attempting to assign does not exist.',
 		});
 		return;
 	}

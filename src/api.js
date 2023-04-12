@@ -25,7 +25,12 @@ apiDirs.forEach(async directory => {
 	});
 
 	endpoints.forEach(value => {
-		app.use(require(__dirname + '/api/' + directory + '/' + value));
+		try {
+			app.use(require(__dirname + '/api/' + directory + '/' + value));
+		} catch (err) {
+			console.log('Error loading an API module:');
+			console.log(err);
+		}
 	});
 });
 
