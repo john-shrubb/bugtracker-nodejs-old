@@ -7,6 +7,7 @@
 	<title>Hello world!</title>
 
 	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 	<style>
 		div.main-wrapper {
 			padding: 15px;
@@ -105,6 +106,17 @@
 
 		#comments-table td.comment-description {
 			vertical-align: middle;
+		}
+
+		td.delete-comment-td {
+			width: 40px;
+		}
+
+		button.delete-comment-button {
+			border: 0;
+			vertical-align: middle;
+			line-height: 40px;
+			font-size: 20px;
 		}
 	</style>
 	</head>
@@ -296,59 +308,139 @@
 				<td class="comment-desc">Comment Description</td>
 			</tr>
 			*/
-		   const commentsTable = document.getElementById('comments-table-body');
 
-		   const getCommentsReq = new XMLHttpRequest();
-		   getCommentsReq.open('get', '/api/comments/get/' + ticketID);
-		   getCommentsReq.send();
+			// Get the tbody#comments-table-body element to append comments to
+			const commentsTable = document.getElementById('comments-table-body');
 
-		   getCommentsReq.onload = async function() {
+			async function deleteComment(commentID) {
+				console.log(commentID);
+				if (isNaN(commentID) || commentID.length !== 15) {
+					throw new Error('Invalid comment ID.');
+				}
+				const request = new XMLHttpRequest();
+				request.open('get', '/api/comments/delete/' + commentID);
+				request.send();
+
+				request.onload = function() {
+					const response = JSON.parse(request.responseText);
+
+					if (response['status'] !== 200) {
+						alert(response['response']);
+						return;
+					}
+
+					window.location.reload();
+				};
+			}
+			// Make a request to get ALL the tickets for the ticket
+			const getCommentsReq = new XMLHttpRequest();
+			getCommentsReq.open('get', '/api/comments/get/' + ticketID);
+			getCommentsReq.send();
+
+			// Once the request comes back
+
+			getCommentsReq.onload = async function() {
+				// Parse the response that came back
+
 				const listResponse = JSON.parse(JSON.parse(getCommentsReq.responseText)); // God knows why I have to parse this twice :(
-				listResponse['response'].sort((a, b) => {
-					return new Date(b['created_on']) - new Date(a['created_on']);
-				});
+				
+				// Show error if there is one
 				if (listResponse['status'] !== 200) {
 					alert(listResponse['response']);
 					return;
 				}
+
+				// Sort tickets from most recent to oldest.
+
+				listResponse['response'].sort((a, b) => {
+					return new Date(b['created_on']) - new Date(a['created_on']);
+				});
+				// For each ticket in the listResponse['response'] array
 				for (const commentIndex in listResponse['response']) {
+					// Get the comment itself and the details of the author of the comment. Also get user details for later on where
+					// we check if the comment can be deleted.
 					const comment = listResponse['response'][commentIndex];
 					const commentAuthor = (await getUserById(comment['user_id']))['response'];
+					const userDetails = await new Promise((resolve) => {
+						const request = new XMLHttpRequest();
+						request.open('get', '/api/user/details');
+						request.send();
+						request.onload = () => resolve(JSON.parse(request.responseText));
+					});
+					// Create a new table row
 
 					const TableRow = document.createElement('tr');
 
+					// Create a profile picture element for the table row
+
 					const tdPFP = document.createElement('td');
 					tdPFP.classList.add('td-pfp');
+					// Set the inner HTML to just contain the image element because I can't be bothered
 					tdPFP.innerHTML = `<img referrerpolicy="no-referrer" src="${commentAuthor['profilepic']}" alt="Comment Author Profile Picture">`;
 					TableRow.appendChild(tdPFP);
 
+					// Create the details of the comment, by far the most complicated part.
 
 					const commentDetails = document.createElement('td');
 					commentDetails.classList.add('comment-details-td')
 					const commentDetailsDiv = document.createElement('div');
 
+					// There's a div wrapping the details so it can display as flex.
+
 					commentDetailsDiv.classList.add('comment-details');
 					commentDetails.appendChild(commentDetailsDiv);
+
+					// The author's name is the first span.
 
 					const detailsAuthorName = document.createElement('span');
 					detailsAuthorName.classList.add('author-name');
 					detailsAuthorName.innerText = commentAuthor['username'];
 					commentDetailsDiv.appendChild(detailsAuthorName);
 
+					// The date that the ticket was created on.
+					// The .toLocaleString function ensures that the time shows up with two digits for the minutes and hours.
+
 					const detailsCreatedOn = document.createElement('span');
 					const commentCreatedDate = new Date(comment['created_on']);
 					detailsCreatedOn.classList.add('comment-date');
+					// Shows up as Today at 00:00 if the ticket was created today and shows up as
+					// Tue Apr 11 2023 at 00:00 if the ticket was created on a different day
 					if (new Date().toDateString() === commentCreatedDate.toDateString()) {
 						detailsCreatedOn.innerText = `Today at ${commentCreatedDate.getHours().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}:${commentCreatedDate.getMinutes().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}`;
 					} else {
 						detailsCreatedOn.innerText = `${commentCreatedDate.toDateString()} at ${commentCreatedDate.getHours().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}:${commentCreatedDate.getMinutes().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}`;
 					}
+
+					// Append to div then append to the table row.
 					commentDetailsDiv.appendChild(detailsCreatedOn);
 					TableRow.appendChild(commentDetails);
+
+					// Create a table cell for the description of the ticket.
 
 					const commentDescription = document.createElement('td');
 					commentDescription.innerText = comment['content'];
 					TableRow.appendChild(commentDescription);
+
+					// Create a cell for the delete comment button IF the user owns the comment or they are a manager or above.
+					console.log( commentAuthor['userID'] === userDetails['response']['userID']);
+					console.log(commentAuthor);
+					console.log(userDetails['response']);
+					console.log(commentAuthor['userID']);
+					console.log(userDetails['response']['userID']);
+					if (userDetails['response']['role'] !== 1 || commentAuthor['userID'] === userDetails['response']['userID']) {
+						const deleteButtonTD = document.createElement('td');
+						const deleteButton = document.createElement('button');
+						deleteButton.classList.add('delete-comment-button');
+						deleteButton.addEventListener('click', function (ev) {
+							deleteComment(comment['comment_id']);
+						});
+						deleteButton.innerHTML = `<span style="width: 40px; height: 40px;" class="material-symbols-outlined">delete</span>`;
+						deleteButtonTD.appendChild(deleteButton);
+						deleteButtonTD.classList.add('delete-comment-td');
+						TableRow.appendChild(deleteButtonTD);
+					}
+
+					// Append all of that to the comments table.
 
 					commentsTable.appendChild(TableRow);
 				}
