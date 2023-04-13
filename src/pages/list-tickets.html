@@ -94,48 +94,78 @@
 	<script src="/assets/js/getTickets.js"></script>
 	<script src="/assets/js/getUserByID.js"></script>
 	<script>
+		// allTickets is a variable that will always store all the tickets.
+
 		let allTickets;
+		
+		// The search box at the top of the page.
+
 		const searchTitleBox = document.getElementById('searchTitleBox');
+		
+		// Event listener for key strokes
+		// I used the keyup event instead of keypress because keypress didnt seem to pick up backspaces
 		searchTitleBox.addEventListener('keyup', function() {
+			// If there is nothing in the search box then just display all the tickets again
+
 			if (!searchTitleBox.value.trim()) {
 				listTickets(allTickets);
 			}
+			// Filter to see if any of the ticket titles contain the value of the search box
 			const tickets = allTickets.filter(function (ticket) {
 				if (ticket['title'].toLowerCase().includes(searchTitleBox.value)) {
+					// If the title of each comment includes what's in the search box
 					return true;
 				}
 
 				return false;
 			});
 
+			// Display the tickets which ended up on the array
+
 			listTickets(tickets);
 		});
 
+		// Function that just waits for all the tickets to be got then displays them all
 		(async function() {
 			allTickets = await getTickets(0);
 			listTickets(allTickets);
 		})();
 
 		async function listTickets(ticketArray) {
+			// Get the table body being used to display the tickets
+
 			const ticketsTbody = document.getElementById('tickets-tbody');
+
 			// Sort by priority
 
 			ticketArray.sort(function (a, b) {
 				return b['priority'] - a['priority'];
 			});
+
+			// An array which will mean that all the tickets will be appended to the table body at the very end
+			// so it looks smoother on the users screen.
 			const toAppend = [];
 
 			for (const ticketIndex in ticketArray) {
+				// The individual ticket being displayed
 				const ticket = ticketArray[ticketIndex];
+
+				// Create a new element which is the table row to hold all the details.
+
 				const TableRow = document.createElement('tr');
 				
+				// Table cell which holds the title of the ticket.
 				const ticketTitleTD = document.createElement('td');
 				ticketTitleTD.innerText = ticket['title'];
 				TableRow.appendChild(ticketTitleTD);
 
+				// Table cell which holds the description of the ticket.
+
 				const ticketDescTD = document.createElement('td');
 				ticketDescTD.innerText = ticket['description'];
 				TableRow.appendChild(ticketDescTD);
+
+				// Table cell which holds the priority of the ticket which is delcared with a ternary operator
 
 				const priorityTD = document.createElement('td');
 				priorityTD.innerText = ticket['priority'] === 3 ? 'High'
@@ -143,23 +173,30 @@
 									: 'Low';
 				TableRow.appendChild(priorityTD);
 
+				// Table cell which holds the username of the author of the ticket.
+
 				const authorTD = document.createElement('td');
 				const author = (await getUserById(ticket['user_id']))['response'].username;
 				authorTD.innerText = author;
 				TableRow.appendChild(authorTD);
 
+				// Hyperlink to view the ticket.
+
 				const viewTicketTD = document.createElement('td');
 				viewTicketTD.innerHTML = `<a href="/tickets/view?ticket=${ticket['ticket_id']}">View Ticket</a>`;
 				TableRow.appendChild(viewTicketTD);
 
+				// Push this newly constructed table row to the toAppend array to be appended to the table at the end of this function
+
 				toAppend.push(TableRow);
 			};
 
-			ticketsTbody.innerHTML = ''; // Clear the table body
+			// Clear the body of the table right before the appending of the table rows for the smoothest experience possible.
+			ticketsTbody.innerHTML = '';
 
 
 			toAppend.forEach(function (value) {
-				ticketsTbody.appendChild(value);
+				ticketsTbody.appendChild(value); // Append each constructed table row to table body.
 			});
 		}
 	</script>
