@@ -305,6 +305,8 @@
 		};
 
 		const deleteTicket = () => {
+			// Open a request to the API to delete a ticket.
+
 			const request = new XMLHttpRequest();
 			request.open('post', '/api/tickets/delete');
 			request.setRequestHeader('Content-Type', 'application/json');
@@ -316,8 +318,10 @@
 				const results = JSON.parse(request.responseText);
 
 				if (results['status'] !== 200) {
+					// Display an alert with the response from the API if the ticket could not be deleted.
 					alert(results['response']);
 				} else {
+					// Send user to dashboard if the ticket was deleted.
 					window.location.replace('/dashboard');
 				}
 			};
@@ -522,15 +526,21 @@
 		   };
 		}
 
+		// Update the toolbar with the ticket priority/status and the delete/edit buttons for the ticket.
+
 		function updateToolbar() {
+			// PRIORITY BUTTONS
+
 			const priorityButtons = Array.from(document.getElementsByClassName('priority-buttons')[0].children);
 			priorityButtons.forEach(function(element) {
 				element.classList.remove('active-button');
 			});
 
+			// Get the current ticket priority to set the active button on the ticket toolbar.
+
 			const ticketPriority = ticketDetails['priority'];
 
-			switch (ticketPriority) {
+			switch (ticketPriority) { // For some reason I reveresed the order of the priority buttons :)
 				case 1:
 					priorityButtons[2].classList.add('active-button');
 					break;
@@ -541,6 +551,8 @@
 					priorityButtons[0].classList.add('active-button');
 					break;
 			}
+
+			// Same operation as above but on the status buttons for the ticket.
 
 			const statusButtons = Array.from(document.getElementsByClassName('status-buttons')[0].children);
 			statusButtons.forEach(function(element) {
@@ -605,6 +617,9 @@
 			request.onload = function() {
 				const response = JSON.parse(request.responseText);
 				if (response['status'] !== 200) {
+					// Display alert with raw API output.
+					// API output is supposed to be readable by user making my job easier.
+
 					alert(response['response']);
 					return;
 				}
