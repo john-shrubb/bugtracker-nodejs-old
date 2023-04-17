@@ -1,19 +1,18 @@
-// Get user by ID
-		
-async function getUserById(userID) {
-	return await new Promise(function (resolve) {
+// This JS file simply grabs the details of the user accessing the page
+
+async function getUserDetails() {
+	return await new Promise(function(resolve) {
 		const request = new XMLHttpRequest();
-		request.open('post', '/api/users/get/id');
-		request.setRequestHeader('Content-Type', 'application/json');
-		request.send(JSON.stringify({
-			userID: userID,
-		}));
+		request.open('get', '/api/user/details');
+		request.send();
+
 		request.onload = function() {
 			const response = JSON.parse(request.responseText);
 
 			if (response['status'] !== 200) {
 				throw new Error('Response from API: ' + response['response']);
 			}
+
 			resolve(response['response']);
 		};
 	});
