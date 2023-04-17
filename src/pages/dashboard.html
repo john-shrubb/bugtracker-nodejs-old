@@ -145,7 +145,7 @@
 					continue;
 				}
 				const tableRow = document.createElement('tr');
-				const ticketAuthor = (await getUserById(ticket['user_id']))['response'];
+				const ticketAuthor = (await getUserById(ticket['user_id']));
 
 				const ticketTitle = document.createElement('td');
 				ticketTitle.innerText = ticket['title'];

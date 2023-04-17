@@ -437,7 +437,7 @@
 					// Get the comment itself and the details of the author of the comment. Also get user details for later on where
 					// we check if the comment can be deleted.
 					const comment = listResponse['response'][commentIndex];
-					const commentAuthor = (await getUserById(comment['user_id']))['response'];
+					const commentAuthor = (await getUserById(comment['user_id']));
 					const userDetails = await new Promise((resolve) => {
 						const request = new XMLHttpRequest();
 						request.open('get', '/api/user/details');

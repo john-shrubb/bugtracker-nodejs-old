@@ -176,7 +176,7 @@
 				// Table cell which holds the username of the author of the ticket.
 
 				const authorTD = document.createElement('td');
-				const author = (await getUserById(ticket['user_id']))['response'].username;
+				const author = (await getUserById(ticket['user_id'])).username;
 				authorTD.innerText = author;
 				TableRow.appendChild(authorTD);
 
