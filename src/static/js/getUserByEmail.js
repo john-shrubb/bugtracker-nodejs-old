@@ -13,7 +13,7 @@ async function getUserByEmail(emailToSearch) {
 			if (response['status'] !== 200) {
 				throw new Error('Response from API: ' + response['response']);
 			}
-			resolve(response);
+			resolve(response['response']);
 		};
 	});
 }

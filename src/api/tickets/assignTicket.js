@@ -18,21 +18,23 @@ const database = require('../../db');
 const canManageTicket = require('../../utils/canManageTicket');
 
 app.post('/api/tickets/assign', async (req, res) => {
+	if (req.headers['content-type'].toLowerCase() !== 'application/json') {
+		res.statusCode = 400;
+		res.json({
+			status: 400,
+			response: 'Incorrect content type',
+		});
+	}
+	
 	// Pull User ID from request object
 
 	const userID = req.oidc.userID;
-
-	// Get ticket id and id of user who is getting
-	// assigned the ticket from request body
-
-	const ticketID = req.body['ticketID'].trim();
-	const toBeAssignedID = req.body['userID'].trim();
 
 	// Validate body to ensure user ID and ticket ID exist.
 	// There will be further validation later to ensure user and
 	// ticket exist to prevent the DB throwing an error.
 
-	if (!ticketID || !toBeAssignedID) {
+	if (!req.body['ticketID'] || !req.body['userID']) {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
@@ -40,6 +42,11 @@ app.post('/api/tickets/assign', async (req, res) => {
 		});
 		return;
 	}
+	// Get ticket id and id of user who is getting
+	// assigned the ticket from request body
+
+	const ticketID = req.body['ticketID'].trim();
+	const toBeAssignedID = req.body['userID'].trim();
 
 	// Validation to check that both the user and the ticket
 	// being assigned actually exist.
@@ -65,6 +72,16 @@ app.post('/api/tickets/assign', async (req, res) => {
 		res.json({
 			status: 400,
 			response: 'The user you are attempting to assign does not exist.',
+		});
+		return;
+	}
+
+	const userAlreadyAssignedQuery = (await database.query('SELECT user_id FROM userassignments WHERE user_id=$1;', [userID])).rows;
+	if (userAlreadyAssignedQuery == true) {
+		res.statusCode = 400;
+		res.json({
+			status: 400,
+			response: 'User has already been assigned to ticket.',
 		});
 		return;
 	}

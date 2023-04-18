@@ -29,8 +29,8 @@ app.post('/api/tickets/:id/edit', async (req, res) => {
 		return;
 	}
 
-	const ticketTitle = req.body['title'].trim();
-	const ticketDescription = req.body['description'].trim();
+	const ticketTitle = req.body['title'] ? req.body['title'].trim() : null;
+	const ticketDescription = req.body['description'] ? req.body['description'].trim() : null;
 
 	if (!ticketTitle && !ticketDescription) {
 		res.statusCode = 400;

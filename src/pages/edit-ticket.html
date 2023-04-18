@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Hello world!</title>
+
+	<link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
+	<style>
+		.view-tickets-block {
+			padding: 20px;
+		}
+
+		#searchTitleBox {
+			border: 3px #919191 solid;
+			padding: 10px;
+			font-size: 1.1rem;
+			margin-top: 8px;
+			margin-bottom: 8px;
+			width: calc(100% - 26px);
+		}
+
+		#searchTitleBox:focus {
+			border: 3px var(--colours-orange) solid;
+			outline: 0;
+		}
+		label {
+			display: block;
+			height: 34px;
+			line-height: 34px;
+			width: 200px;
+			float: left;
+			clear: left;
+			margin-top: 10px;
+		}
+
+		input[type="text"], textarea {
+			display: inline-block;
+			padding: 5px;
+			border: #3b3b3b 2px solid;
+			font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
+			font-size: 1rem;
+			clear: left;
+			width: calc(100% - 30vw);
+			resize: none;
+			max-width: 500px;
+			margin-top: 10px;
+		}
+
+		input[type="text"]:focus, textarea:focus {
+			outline: 0;
+			border-color: var(--colours-orange);
+		}
+
+		button {
+			padding: 5px;
+			border: var(--colours-orange) 2px solid;
+			color: black;
+			background: transparent;
+			outline: 0;
+			font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
+			display: block;
+			margin-top: 10px;
+		}
+	</style>
+	</head>
+<body>
+	<div class="body-wrapper">
+		<div class="top-title-bar">
+			<h3>Create Ticket</h3>
+			<h3 id="top-title-bar-username">Username</h3>
+		</div>
+		<div class="sidebar">
+			<a href="/dashboard">Dashboard</a>
+			<a href="/tickets/create">Create a Ticket</a>
+			<a href="/tickets/viewall">View Tickets</a>
+			<a href="/users/manage">User Management</a>
+			<a href="/logout">Logout</a>
+		</div>
+		<div class="main-wrapper">
+			<div class="view-tickets-block">
+				<h3>Edit a ticket</h3>
+				<p>You can edit the title, description and assign users here.<br>Please note you must be the ticket owner to edit the title and description.</p>
+				<label for="newTitle">Ticket Title:</label>
+				<input type="text" name="" id="new-title">
+				<label for="newDescription">Ticket Description:</label>
+				<textarea name="" id="new-description" cols="30" rows="10"></textarea>
+				<button id="save-button">Save Changes</button>
+				<label for="userAssignmentInput">Assign a User</label>
+				<input type="text" name="" id="userAssignmentInput" placeholder="john.pork@gmail.com">
+				<button id="assign-button">Assign User</button>
+			</div>
+		</div>
+	</div>
+
+	<script src="/assets/js/getTicketById.js"></script>
+	<script src="/assets/js/getUserByEmail.js"></script>
+	<script src="/assets/js/getUserById.js"></script>
+	<script src="/assets/js/getUserDetails.js"></script>
+	<script>
+		const query = new URLSearchParams(window.location.search);
+
+		// Just redirects to dashboard if there isn't a ticket ID.
+
+		if (!query.has('ticket')) {
+			window.location.replace('/dashboard');
+			throw Error('No or invalid ticket ID. Redirecting to dashboard.'); // Throws an error to prevent any further execution of code and unecessary calls to the API.
+		}
+
+		const ticketID = query.get('ticket');
+
+		let ticketDetails;
+		let authorDetails;
+		let userDetails;
+
+		// For editing the ticket itself.
+
+		const ticketTitleInp = document.getElementById('new-title');
+		const ticketDescriptionInp = document.getElementById('new-description');
+
+		// Input for assigning users.
+
+		const userEmailInp = document.getElementById('userAssignmentInput');
+
+		// All code that is supposed to intalise the page.
+
+		(async function() {
+			try {
+				ticketDetails = await getTicketById(ticketID);
+			} catch(err) {
+				await window.location.replace('/dashboard');
+			}
+			userDetails = await getUserDetails();
+			authorDetails = await getUserById(ticketDetails['user_id']);
+			
+			ticketTitleInp.value = ticketDetails['title'];
+			ticketDescriptionInp.value = ticketDetails['description'];
+		})()
+
+		// Function to edit the ticket. Probs could have just been included in the addEventListener function
+
+		async function editTicket(newTitle, newDescription) {
+			// Validation check for the existence of both required arguments
+			if (!newTitle.trim() && !newDescription.trim()) {
+				throw new Error('Arguments must be passed for this function.');
+			}
+
+			// Open a request to the edit tickets page
+
+			const request = new XMLHttpRequest();
+			request.open('post', '/api/tickets/' + ticketID + '/edit');
+			request.setRequestHeader('Content-Type', 'application/json');
+
+			if (newTitle.trim() !== ticketDetails['title'].trim() && newDescription.trim() !== ticketDetails['description'].trim()) { // If both the title and description have been edited
+				request.send(JSON.stringify({
+					title: newTitle,
+					description: newDescription,
+				}));
+			} else if (newTitle.trim() !== ticketDetails['title'].trim()) { // If newTitle is different to current title
+				request.send(JSON.stringify({
+					title: newTitle,
+				}));
+			} else if (newDescription.trim() !== ticketDetails['description'].trim()) { // If the description has been edited
+				request.send(JSON.stringify({
+					description: newDescription,
+				}));
+			}
+
+			// Handle it when the request loads.
+
+			request.onload = function() {
+				console.log(request.responseText);
+				const response = JSON.parse(request.responseText);
+				if (response['status'] !== 200) {
+					alert(response['response']);
+					return;
+				} else {
+					alert('Ticket sucessfully edited');
+					return;
+				}
+			};
+		}
+
+		// Add the event listener to the button
+
+		document.getElementById('save-button').addEventListener('click', function() {
+			if (!ticketTitleInp.value.trim() || !ticketDescriptionInp.value.trim()) {
+				alert('Cannot save an empty title or description!');
+				return;
+			}
+
+			if (ticketTitleInp.value.trim() === ticketDetails['title'] && ticketDescriptionInp.value.trim() === ticketDetails['description']) {
+				alert('Title and the description have not been changed.');
+				return;
+			}
+
+			try {
+				editTicket(ticketTitleInp.value.trim(), ticketDescriptionInp.value.trim());
+			} catch (err) {
+				console.error(err);
+			}
+		});
+
+		// Assign button
+
+		document.getElementById('assign-button').addEventListener('click', async function() {
+			const userEmail = userEmailInp.value.trim();
+			if (!userEmail) {
+				console.error('No email is present');
+				return;
+			}
+
+			let userDetails;
+
+			try {
+				userDetails = await getUserByEmail(userEmail);
+			} catch (err) {
+				alert('User email does not exist.');
+				return;
+			}
+
+			const request = new XMLHttpRequest();
+			request.open('post', '/api/tickets/assign');
+			request.setRequestHeader('Content-Type', 'application/json');
+			request.send(JSON.stringify({
+				ticketID: ticketID,
+				userID: userDetails['userID'],
+			}));
+
+			request.onload = function() {
+				const response = JSON.parse(request.responseText);
+				if (response['status'] !== 200) {
+					alert(response['response']);
+					return;
+				}
+
+				alert('User succesfully assigned to ticket.');
+			}
+		});
+	</script>
+	<script src="/assets/js/updateUsername.js"></script>
+</body>
+</html>
