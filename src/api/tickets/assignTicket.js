@@ -50,8 +50,30 @@ app.post('/api/tickets/assign', async (req, res) => {
 
 	// Validation to check that both the user and the ticket
 	// being assigned actually exist.
-	const validateTicketQ = (await database.query('SELECT * FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
-	const validateUserQ = (await database.query('SELECT * FROM users WHERE user_id=$1', [toBeAssignedID])).rows[0];
+	const validateTicketQ = (await database.query('SELECT ticket_id, user_id FROM tickets WHERE ticket_id=$1;', [ticketID])).rows[0];
+	const validateUserQ = (await database.query('SELECT user_id, role FROM users WHERE user_id=$1', [toBeAssignedID])).rows[0];
+
+	// No point in assigning the ticket if the user is role 2+
+	if (validateUserQ['role'] !== 1) {
+		res.statusCode = 200;
+		res.json({
+			status: 200,
+			response: 'User is a manager/owner, there is no need to assign this ticket.',
+		});
+		return;
+	}
+
+	// If the user being assigned is the owner of the ticket.
+	// You can't assign yourself.
+
+	if (validateTicketQ['user_id'] === toBeAssignedID) {
+		res.statusCode = 200;
+		res.json({
+			status: 200,
+			response: 'You own this ticket already!',
+		});
+		return;
+	}
 
 	// Checks to:
 	// - Check that the ticket exists
@@ -76,8 +98,8 @@ app.post('/api/tickets/assign', async (req, res) => {
 		return;
 	}
 
-	const userAlreadyAssignedQuery = (await database.query('SELECT user_id FROM userassignments WHERE user_id=$1;', [userID])).rows;
-	if (userAlreadyAssignedQuery == true) {
+	const userAlreadyAssignedQuery = (await database.query('SELECT user_id FROM userassignments WHERE user_id=$1 AND ticket_id=$2;', [toBeAssignedID, ticketID])).rows;
+	if (userAlreadyAssignedQuery.length) {
 		res.statusCode = 400;
 		res.json({
 			status: 400,
