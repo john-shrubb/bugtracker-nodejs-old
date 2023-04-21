@@ -60,7 +60,7 @@ app.use(async (req, res, next) => {
 			// Check DB to ensure that the user ID has not
 			// already been assigned.
 
-			const checkQuery = await database.query('SELECT * FROM users WHERE user_id=$1', userID);
+			const checkQuery = await database.query('SELECT * FROM users WHERE user_id=$1', [userID]);
 
 			// If is has then break the loop, otherwise
 			// generate a new ID and repeat.
