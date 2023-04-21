@@ -165,6 +165,22 @@ app.get('/error', (_, __, next) => {
 app.use((error, _, res, __) => { //eslint-disable-line
 	res.end('500 Error.');
 	console.log(error);
+	return;
+});
+
+app.use((req, res) => {
+	if (req.path.startsWith('/api/')) {
+		res.status = 404;
+		res.json({
+			status: 404,
+			response: 'API endpoint not found',
+		});
+		return;
+	} else {
+		res.statusCode = 404;
+		res.end('<h1>404 Not Found</h1><a href="/dashboard">Go to dashboard</a>');
+		return;
+	}
 });
 
 // Start the web server up.
