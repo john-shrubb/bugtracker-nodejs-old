@@ -257,7 +257,7 @@
 		
 		// Set the title & description of the ticket
 
-		ticketRequest.onload = () => {
+		ticketRequest.onload = async function() {
 			// Parse JSON response
 			ticketDetails = JSON.parse(ticketRequest.responseText);
 
@@ -284,21 +284,12 @@
 				//                         "Thu Apr 06 2023 at 10:56"
 			}
 
-			// Open a request to get the details of the author of the ticket.
+			// Get details of the author of the ticket.
 
-			const authorRequest = new XMLHttpRequest();
-			authorRequest.open('post', '/api/users/get/id');
-			authorRequest.setRequestHeader('Content-Type', 'application/json');
-			authorRequest.send(JSON.stringify({
-				'userID': ticketDetails['user_id'],
-			}));
+			const authorDetails = await getUserById(ticketDetails['user_id']);
 
-			authorRequest.onload = () => {
-				authorDetails = JSON.parse(authorRequest.responseText)['response'];
-
-				authorUsernameSpan.innerText = authorDetails['username'] ? authorDetails['username'] : 'Deleted User'; // Set username
-				authorProfilePicture.src = authorDetails['profilepic']; // Set PFP
-			};
+			authorUsernameSpan.innerText = authorDetails['username'] ? authorDetails['username'] : 'Deleted User'; // Set username
+			authorProfilePicture.src = authorDetails['profilepic']; // Set PFP
 			updateCommentsTable();
 			updateToolbar();
 

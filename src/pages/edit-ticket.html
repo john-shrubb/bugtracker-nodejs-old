@@ -53,7 +53,7 @@
 			border-color: var(--colours-orange);
 		}
 
-		button {
+		button, .button {
 			padding: 5px;
 			border: var(--colours-orange) 2px solid;
 			color: black;
@@ -62,6 +62,14 @@
 			font-family: 'Roboto', Verdana, Geneva, Tahoma, sans-serif;
 			display: block;
 			margin-top: 10px;
+			width: max-content;
+			color: black;
+			text-decoration: none;
+		}
+
+		button:hover, .button:hover {
+			color: var(--colours-orange);
+			cursor: pointer;
 		}
 	</style>
 	</head>
@@ -90,6 +98,8 @@
 				<label for="userAssignmentInput">Assign a User</label>
 				<input type="text" name="" id="userAssignmentInput" placeholder="john.pork@gmail.com">
 				<button id="assign-button">Assign User</button>
+
+				<a id="back-to-ticket" class="button" href="#">Back to ticket</a>
 			</div>
 		</div>
 	</div>
@@ -136,7 +146,9 @@
 			
 			ticketTitleInp.value = ticketDetails['title'];
 			ticketDescriptionInp.value = ticketDetails['description'];
-		})()
+
+			document.getElementById('back-to-ticket').href = '/tickets/view?ticket=' + ticketID;
+		})();
 
 		// Function to edit the ticket. Probs could have just been included in the addEventListener function
 
