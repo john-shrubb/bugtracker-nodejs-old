@@ -27,9 +27,6 @@ app.use(authmid);
 
 const IDGen = require('./utils/idgen');
 
-// Very basic root link.
-// Should redirect to dashboard later in development.
-
 app.use(async (req, res, next) => {
 	if (!req.oidc.isAuthenticated()) {
 		if (req.path.startsWith('/api')) {

@@ -133,3 +133,16 @@ It is possible to omit one of these fields, if you do not want to edit both part
 	"response": "Successfully modified ticket."
 }
 ```
+
+## `/api/tickets/[TICKETID]/setpriority/[PRIORITY]`
+
+Action Type: `GET`
+
+`[TICKETID]` should be the ID of the ticket you are attempting to edit.
+`[PRIORITY]` should be what you are attempting to set the priority to.
+The priorities that can be assigned to a ticket are listed below:
+- 1 = Low priority
+- 2 = Medium priority
+- 3 = High priority
+
+If a status other than 200 is returned then there was an error setting the ticket priority.
