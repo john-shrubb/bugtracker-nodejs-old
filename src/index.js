@@ -162,10 +162,21 @@ app.get('/error', (_, __, next) => {
 
 // EXTREMELY basic error handling.
 
-app.use((error, _, res, __) => { //eslint-disable-line
-	res.end('500 Error.');
-	console.log(error);
-	return;
+app.use((error, req, res, __) => { //eslint-disable-line
+	if (req.path.startsWith('/callback')) {
+		res.redirect('/dashboard');
+		return;
+	} else if (req.path.startsWith('/api')) {
+		res.statusCode = 500;
+		res.json({
+			status: 500,
+			response: 'Internal server error.',
+		});
+	} else {
+		res.end('500 Error.');
+	}
+
+	console.error(error);
 });
 
 app.use((req, res) => {
@@ -187,6 +198,8 @@ app.use((req, res) => {
 
 app.listen(
 	config.prodport,
-	'0.0.0.0',
-	() => console.log('Server online on port ' + config.prodport)
+	config.host,
+	() => {
+		console.log(`Server listening on ${config.host}:${config.prodport}`);
+	}
 );
