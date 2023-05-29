@@ -77,7 +77,7 @@ app.post('/api/tickets/:id/edit', async (req, res) => {
 
 	res.json({
 		status: 200,
-		response: 'Succesfully modified ticket.',
+		response: 'Successfully modified ticket.',
 	});
 });
 
