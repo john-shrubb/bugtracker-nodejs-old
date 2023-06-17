@@ -20,6 +20,7 @@ app.get('/api/user/details', async (req, res) => {
 		},
 	};
 
+	res.setHeader('Content-Type', 'application/json');
 	// Will be used for profile pictures etc.
 	res.end(JSON.stringify(response));
 });
