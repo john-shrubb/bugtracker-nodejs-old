@@ -280,7 +280,7 @@
 				ticketDateSpan.innerText = `Today at ${createdDate.getHours().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}:${createdDate.getMinutes().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}`;
 				//                          "Today at 10:54"
 			} else {
-				ticketDateSpan.innerText = `${createdDate.toDateString()} at ${createdDate.getHours()}:${createdDate.getMinutes()}`
+				ticketDateSpan.innerText = `${createdDate.toDateString()} at ${createdDate.getHours().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}:${createdDate.getMinutes().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}`
 				//                         "Thu Apr 06 2023 at 10:56"
 			}
 
@@ -471,8 +471,8 @@
 					const detailsCreatedOn = document.createElement('span');
 					const commentCreatedDate = new Date(comment['created_on']);
 					detailsCreatedOn.classList.add('comment-date');
-					// Shows up as Today at 00:00 if the ticket was created today and shows up as
-					// Tue Apr 11 2023 at 00:00 if the ticket was created on a different day
+					// Shows up as Today at 00:00 if the comment was created today and shows up as
+					// Tue Apr 11 2023 at 00:00 if the comment was created on a different day
 					if (new Date().toDateString() === commentCreatedDate.toDateString()) {
 						detailsCreatedOn.innerText = `Today at ${commentCreatedDate.getHours().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}:${commentCreatedDate.getMinutes().toLocaleString('en-gb', { minimumIntegerDigits: 2 })}`;
 					} else {
