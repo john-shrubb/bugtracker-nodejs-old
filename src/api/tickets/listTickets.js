@@ -29,6 +29,8 @@ app.get('/api/tickets/list/:count', async (req, res) => {
 		}
 	}
 
+	res.setHeader('Content-Type', 'application/json');
+
 	res.end(JSON.stringify({
 		status: 200,
 		response: allowedTickets,
